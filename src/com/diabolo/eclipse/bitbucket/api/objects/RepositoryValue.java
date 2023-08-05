@@ -1,12 +1,12 @@
 
-package com.diabolo.eclipse.bitbucket.api.repositories;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("jsonschema2pojo")
-public class Value {
+public class RepositoryValue {
 
     @SerializedName("slug")
     @Expose

@@ -1,12 +1,12 @@
 
-package com.diabolo.eclipse.bitbucket.api.pullquests;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("jsonschema2pojo")
-public class User {
+public class Owner {
 
     @SerializedName("name")
     @Expose
@@ -29,7 +29,7 @@ public class User {
     @SerializedName("type")
     @Expose
     private String type;
-
+ 
     public String getName() {
         return name;
     }
@@ -86,4 +86,4 @@ public class User {
         this.type = type;
     }
 
-}
+ }

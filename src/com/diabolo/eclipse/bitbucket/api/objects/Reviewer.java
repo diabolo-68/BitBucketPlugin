@@ -1,16 +1,13 @@
 
-package com.diabolo.eclipse.bitbucket.api.pullquests;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("jsonschema2pojo")
-public class Author {
+public class Reviewer {
 
-    @SerializedName("user")
-    @Expose
-    private User user;
     @SerializedName("role")
     @Expose
     private String role;
@@ -20,14 +17,9 @@ public class Author {
     @SerializedName("status")
     @Expose
     private String status;
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
+    @SerializedName("lastReviewedCommit")
+    @Expose
+    private String lastReviewedCommit;
 
     public String getRole() {
         return role;
@@ -51,6 +43,14 @@ public class Author {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getLastReviewedCommit() {
+        return lastReviewedCommit;
+    }
+
+    public void setLastReviewedCommit(String lastReviewedCommit) {
+        this.lastReviewedCommit = lastReviewedCommit;
     }
 
 }

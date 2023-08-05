@@ -1,5 +1,5 @@
 
-package com.diabolo.eclipse.bitbucket.api.repositories;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
 import java.util.List;
 import javax.annotation.Generated;
@@ -20,7 +20,7 @@ public class Repositories {
     private Boolean isLastPage;
     @SerializedName("values")
     @Expose
-    private List<Value> values;
+    private List<RepositoryValue> values;
     @SerializedName("start")
     @Expose
     private Integer start;
@@ -52,11 +52,11 @@ public class Repositories {
         this.isLastPage = isLastPage;
     }
 
-    public List<Value> getValues() {
+    public List<RepositoryValue> getValues() {
         return values;
     }
 
-    public void setValues(List<Value> values) {
+    public void setValues(List<RepositoryValue> values) {
         this.values = values;
     }
 

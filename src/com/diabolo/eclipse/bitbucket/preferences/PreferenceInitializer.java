@@ -4,7 +4,7 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.diabolo.eclipse.bitbucket.UrlProtocol;
-import com.diabolo.eclipse.bitbucket.api.pullquests.Activator;
+import com.diabolo.eclipse.bitbucket.api.objects.Activator;
 
 /**
  * Class used to initialize default preference values.

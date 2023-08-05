@@ -1,5 +1,5 @@
 
-package com.diabolo.eclipse.bitbucket.api.pullquests;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("jsonschema2pojo")
-public class Pullrequests {
+public class Projects {
 
     @SerializedName("size")
     @Expose
@@ -21,7 +21,7 @@ public class Pullrequests {
     private Boolean isLastPage;
     @SerializedName("values")
     @Expose
-    private List<Value> values = new ArrayList<Value>();
+    private List<ProjectValue> values = new ArrayList<ProjectValue>();
     @SerializedName("start")
     @Expose
     private Integer start;
@@ -50,11 +50,11 @@ public class Pullrequests {
         this.isLastPage = isLastPage;
     }
 
-    public List<Value> getValues() {
+    public List<ProjectValue> getValues() {
         return values;
     }
 
-    public void setValues(List<Value> values) {
+    public void setValues(List<ProjectValue> values) {
         this.values = values;
     }
 

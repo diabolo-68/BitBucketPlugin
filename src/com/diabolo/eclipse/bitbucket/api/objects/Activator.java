@@ -1,4 +1,4 @@
-package com.diabolo.eclipse.bitbucket.api.pullquests;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;

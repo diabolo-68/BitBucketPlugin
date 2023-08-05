@@ -12,9 +12,9 @@ import org.apache.commons.httpclient.HttpConstants;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import com.diabolo.eclipse.bitbucket.api.projects.Projects;
-import com.diabolo.eclipse.bitbucket.api.pullquests.Pullrequests;
-import com.diabolo.eclipse.bitbucket.api.repositories.Repositories;
+import com.diabolo.eclipse.bitbucket.api.objects.Projects;
+import com.diabolo.eclipse.bitbucket.api.objects.Pullrequests;
+import com.diabolo.eclipse.bitbucket.api.objects.Repositories;
 import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
 import com.google.gson.Gson;
 

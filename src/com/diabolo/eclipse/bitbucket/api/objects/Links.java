@@ -1,7 +1,6 @@
 
-package com.diabolo.eclipse.bitbucket.api.projects;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
@@ -12,7 +11,7 @@ public class Links {
 
     @SerializedName("self")
     @Expose
-    private List<Self> self = new ArrayList<Self>();
+    private List<Self> self;
 
     public List<Self> getSelf() {
         return self;

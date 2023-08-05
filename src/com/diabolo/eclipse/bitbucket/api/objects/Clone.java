@@ -1,16 +1,19 @@
 
-package com.diabolo.eclipse.bitbucket.api.repositories;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("jsonschema2pojo")
-public class Self {
+public class Clone {
 
     @SerializedName("href")
     @Expose
     private String href;
+    @SerializedName("name")
+    @Expose
+    private String name;
 
     public String getHref() {
         return href;
@@ -18,6 +21,14 @@ public class Self {
 
     public void setHref(String href) {
         this.href = href;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

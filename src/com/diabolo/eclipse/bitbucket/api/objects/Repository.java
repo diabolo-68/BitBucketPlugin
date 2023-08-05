@@ -1,12 +1,12 @@
 
-package com.diabolo.eclipse.bitbucket.api.projects;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("jsonschema2pojo")
-public class Value {
+public class Repository {
 
     @SerializedName("key")
     @Expose
@@ -29,6 +29,9 @@ public class Value {
     @SerializedName("description")
     @Expose
     private String description;
+    @SerializedName("owner")
+    @Expose
+    private Owner owner;
 
     public String getKey() {
         return key;
@@ -84,6 +87,14 @@ public class Value {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Owner getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Owner owner) {
+        this.owner = owner;
     }
 
 }

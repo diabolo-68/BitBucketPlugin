@@ -51,9 +51,10 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.diabolo.eclipse.bitbucket.MyTitleAreaDialog;
 import com.diabolo.eclipse.bitbucket.Services;
-import com.diabolo.eclipse.bitbucket.api.projects.Projects;
-import com.diabolo.eclipse.bitbucket.api.pullquests.Pullrequests;
-import com.diabolo.eclipse.bitbucket.api.repositories.Repositories;
+import com.diabolo.eclipse.bitbucket.api.objects.Projects;
+import com.diabolo.eclipse.bitbucket.api.objects.Pullrequests;
+import com.diabolo.eclipse.bitbucket.api.objects.Repositories;
+
 import org.eclipse.jface.viewers.ComboViewer;
 
 /**
@@ -102,8 +103,8 @@ public class PullRequestsView extends ViewPart {
 	private Action PullRequestdoubleClickAction;
 	private TreeParent invisibleRoot = null;
 	private Text txtFilter;
-	private List<com.diabolo.eclipse.bitbucket.api.projects.Value> projectsValues;
-	private List<com.diabolo.eclipse.bitbucket.api.repositories.Value> repositoriesValues;
+	private List<com.diabolo.eclipse.bitbucket.api.objects.ProjectValue> projectsValues;
+	private List<com.diabolo.eclipse.bitbucket.api.objects.RepositoryValue> repositoriesValues;
 	private Services services = new Services();
 	private Combo cboRepositories;
 	private Combo cboProjects;
@@ -213,7 +214,7 @@ public class PullRequestsView extends ViewPart {
 			repositoriesValues.forEach(repository -> {
 
 				Pullrequests pullRequests;
-				List<com.diabolo.eclipse.bitbucket.api.pullquests.Value> pullRequestValues;
+				List<com.diabolo.eclipse.bitbucket.api.objects.PullrequestValue> pullRequestValues;
 
 				try {
 

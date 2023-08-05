@@ -1,5 +1,5 @@
 
-package com.diabolo.eclipse.bitbucket.api.pullquests;
+package com.diabolo.eclipse.bitbucket.api.objects;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("jsonschema2pojo")
-public class Value {
+public class PullrequestValue {
 
     @SerializedName("id")
     @Expose
