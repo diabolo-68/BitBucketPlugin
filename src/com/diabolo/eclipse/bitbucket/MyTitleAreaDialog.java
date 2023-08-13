@@ -21,7 +21,6 @@ public class MyTitleAreaDialog extends TitleAreaDialog {
 
     public MyTitleAreaDialog(Shell parentShell) {
         super(parentShell);
-        System.out.println("++++++++++++++++++++");
     }
 
     @Override
@@ -29,7 +28,6 @@ public class MyTitleAreaDialog extends TitleAreaDialog {
         super.create();
         setTitle("This is my first custom dialog");
         setMessage("This is a TitleAreaDialog", IMessageProvider.INFORMATION);
-        System.out.println("@@@@@@@@@@@@@@@@@@@");
     }
 
     @Override

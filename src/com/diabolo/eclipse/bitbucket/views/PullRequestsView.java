@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -19,9 +20,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -51,11 +55,19 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.diabolo.eclipse.bitbucket.MyTitleAreaDialog;
 import com.diabolo.eclipse.bitbucket.Services;
+import com.diabolo.eclipse.bitbucket.valuePair;
 import com.diabolo.eclipse.bitbucket.api.objects.Projects;
+import com.diabolo.eclipse.bitbucket.api.objects.PullrequestValue;
 import com.diabolo.eclipse.bitbucket.api.objects.Pullrequests;
 import com.diabolo.eclipse.bitbucket.api.objects.Repositories;
+import com.google.gson.JsonArray;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.jface.viewers.TableViewer;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -109,13 +121,24 @@ public class PullRequestsView extends ViewPart {
 	private Combo cboRepositories;
 	private Combo cboProjects;
 	private Combo cboFilterOn;
+	private TableViewer tableViewer;
 
 	class TreeObject implements IAdaptable {
 		private String name;
 		private TreeParent parent;
+		private Object data;
 
 		public TreeObject(String name) {
 			this.name = name;
+		}
+
+		public TreeObject(String name, Object data) {
+			this.name = name;
+			this.data = data;
+		}
+
+		public Object getData() {
+			return this.data;
 		}
 
 		public String getName() {
@@ -223,9 +246,10 @@ public class PullRequestsView extends ViewPart {
 
 					String cboValue = repository.getProject().getName() + " / " + repository.getName();
 
+					PullrequestValue pullrequestValue = (PullrequestValue) cboRepositories.getData(cboValue);
+
 					if (cboRepositories.getItem(idxRepositories).compareTo("All") == 0
-							|| ((String) cboRepositories.getData(cboValue))
-									.compareTo(repository.getId().toString()) == 0) {
+							|| pullrequestValue.getId() == repository.getId()) {
 
 						if (cboProjects.getItem(idxProject).compareTo("All") == 0
 								|| cboProjects.getItem(idxProject).compareTo(repository.getProject().getName()) == 0) {
@@ -237,41 +261,36 @@ public class PullRequestsView extends ViewPart {
 
 							if (pullRequestValues.size() > 0) {
 
-								TreeParent repositoryTree = new TreeParent(
-										repository.getProject().getName() + " / " + repository.getName());
+								TreeParent repositoryTree = new TreeParent(cboValue);
 
 								pullRequestValues.forEach(prValue -> {
+
+									String treeName = String.format("%s - %s", prValue.getTitle(), prValue.getAuthor().getUser().getDisplayName());
+
 									if (!txtFilter.getText().isBlank()) {
-										
+
 										switch(cboFilterOn.getSelectionIndex()) {
 										case 0:
 											if (prValue.getTitle().contains(txtFilter.getText())) {
-												TreeObject pullRequest = new TreeObject(
-														String.format("%s - %s", prValue.getTitle(),
-																prValue.getAuthor().getUser().getDisplayName()));
+												TreeObject pullRequest = new TreeObject(treeName, prValue);
 												repositoryTree.addChild(pullRequest);
 											}
 											break;
 										case 1:
 											if (prValue.getFromRef().getDisplayId().contains(txtFilter.getText())) {
-												TreeObject pullRequest = new TreeObject(
-														String.format("%s - %s", prValue.getTitle(),
-																prValue.getAuthor().getUser().getDisplayName()));
+												TreeObject pullRequest = new TreeObject(treeName, prValue);
 												repositoryTree.addChild(pullRequest);
 											}
 											break;
 										case 2:
 											if (prValue.getToRef().getDisplayId().contains(txtFilter.getText())) {
-												TreeObject pullRequest = new TreeObject(
-														String.format("%s - %s", prValue.getTitle(),
-																prValue.getAuthor().getUser().getDisplayName()));
+												TreeObject pullRequest = new TreeObject(treeName, prValue);
 												repositoryTree.addChild(pullRequest);
 											}
 											break;
 										}
 									} else {
-										TreeObject pullRequest = new TreeObject(String.format("%s - %s",
-												prValue.getTitle(), prValue.getAuthor().getUser().getDisplayName()));
+										TreeObject pullRequest = new TreeObject(treeName, prValue);
 										repositoryTree.addChild(pullRequest);
 									}
 								});
@@ -308,7 +327,7 @@ public class PullRequestsView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		parent.setLayout(new GridLayout(4, false));
+		parent.setLayout(new GridLayout(6, false));
 
 		// TODO: Check if PR can be merged, highlight the PR if conflict
 
@@ -329,6 +348,7 @@ public class PullRequestsView extends ViewPart {
 		cboProjects.setText("Project");
 		projectsValues.forEach(project -> {
 			cboProjects.add(project.getName());
+			cboProjects.setData(project.getName(),project);
 		});
 
 		cboProjects.select(0);
@@ -339,7 +359,7 @@ public class PullRequestsView extends ViewPart {
 
 		txtFilter = new Text(parent, SWT.BORDER);
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		
+
 		Button btnRefresh = new Button(parent, SWT.NONE);
 		btnRefresh.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -360,29 +380,34 @@ public class PullRequestsView extends ViewPart {
 
 		btnRefresh.setText("Refresh list");
 
+		new Label(parent, SWT.NONE);
+		new Label(parent, SWT.NONE);
+
 		cboRepositories = new Combo(parent, SWT.NONE);
 		cboRepositories.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		
+
 		cboRepositories.setText("Repository");
 
 		fillCboRepositories(cboProjects.getItem(cboProjects.getSelectionIndex()).toString());
-		
+
+		new Label(parent, SWT.NONE);
+
 		Label lblFilterOn_2 = new Label(parent, SWT.NONE);
 		lblFilterOn_2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		lblFilterOn_2.setText("Filter on:");
-		
+
 		ComboViewer comboViewer = new ComboViewer(parent, SWT.NONE);
 		cboFilterOn = comboViewer.getCombo();
 		cboFilterOn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		cboFilterOn.setItems(new String[] {"Pull Request Title", "Source Branch", "Target Branch"});
 		cboFilterOn.setToolTipText("Select on which element the filter must apply to");
 		cboFilterOn.select(0);
-		
+		new Label(parent, SWT.NONE);
 		new Label(parent, SWT.NONE);
 
 		ScrolledComposite scPullRequestsViewer = new ScrolledComposite(parent,
 				SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		scPullRequestsViewer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true, 4, 1));
+		scPullRequestsViewer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true, 4, 1));
 		scPullRequestsViewer.setExpandHorizontal(true);
 		scPullRequestsViewer.setExpandVertical(true);
 		viewerPullRequests = new TreeViewer(scPullRequestsViewer, SWT.NONE);
@@ -400,6 +425,78 @@ public class PullRequestsView extends ViewPart {
 		workbench.getHelpSystem().setHelp(viewerPullRequests.getControl(), "com.diabolo.eclipse.bitbucket.viewer");
 		getSite().setSelectionProvider(viewerPullRequests);
 		scPullRequestsViewer.setContent(treePullRequests);
+
+
+		tableViewer = new TableViewer(parent);
+		Table table = tableViewer.getTable();
+		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+		// Define the layout of the table*
+
+		TableLayout tlayout = new TableLayout();
+		tlayout.addColumnData( new ColumnWeightData( 50, 100, true ));
+		tlayout.addColumnData( new ColumnWeightData( 50, 200, true ));
+
+
+		String[] COLUMNS = new String[] { "Element", "Value" };
+
+		for( String element : COLUMNS ) {
+			TableColumn col = new TableColumn( tableViewer.getTable(), SWT.CENTER );
+			col.setText( element);
+		}
+		
+		tableViewer.setContentProvider( new ArrayContentProvider());
+
+		tableViewer.getTable().setLayout(tlayout);
+
+		// For very element to display, we will select what to display
+		// in function of the column index
+		tableViewer.setLabelProvider( new ITableLabelProvider() {
+
+			@Override
+			public void removeListener( ILabelProviderListener arg0 ) {
+				// nothing
+			}
+
+			@Override
+			public boolean isLabelProperty( Object arg0, String arg1 ) {
+				return false;
+			}
+
+			@Override
+			public void dispose() {
+				// nothing
+			}
+
+			@Override
+			public void addListener( ILabelProviderListener arg0 ) {
+				// nothing
+			}
+
+			@Override
+			public String getColumnText( Object element, int colmnIndex ) {
+
+				String result = null;
+				switch( colmnIndex ) {
+				case 0:
+					result = ((valuePair) element).getKey();
+					break;
+
+				case 1:
+					result = ((valuePair) element).getValue();
+					break;
+				}
+				return result;
+			}
+
+			@Override
+			public Image getColumnImage( Object element, int colmnIndex ) {
+				return null;
+			}
+		});
+
+
+
 		makeActions();
 		hookContextMenu();
 		hookPullRequestdoubleClickAction();
@@ -418,7 +515,7 @@ public class PullRequestsView extends ViewPart {
 				if (repository.getProject().getType().compareTo("NORMAL") == 0) {
 					String cboValue = repository.getProject().getName() + " / " + repository.getName();
 					cboRepositories.add(cboValue);
-					cboRepositories.setData(cboValue, repository.getId());
+					cboRepositories.setData(cboValue, repository);
 				}
 			}
 		});
@@ -503,8 +600,21 @@ public class PullRequestsView extends ViewPart {
 		PullRequestdoubleClickAction = new Action() {
 			public void run() {
 				IStructuredSelection selection = viewerPullRequests.getStructuredSelection();
-				Object obj = selection.getFirstElement();
-				showMessage("Double-click detected on " + obj.toString());
+				TreeObject obj = (TreeObject) selection.getFirstElement();
+
+				valuePair [] currentLine = new valuePair [3] ;
+
+				PullrequestValue prValue = ((PullrequestValue) obj.getData());
+
+
+				currentLine [0] = new valuePair("Data 1", prValue.getAuthor().getUser().getName());
+				currentLine [1] = new valuePair("Data 2", prValue.getTitle());
+				currentLine [2] = new valuePair("Data 3", prValue.getFromRef().getId());
+
+				tableViewer.setInput(currentLine);
+				tableViewer.refresh();
+
+				//showMessage("\nDouble-click detected on " + ((PullrequestValue) obj.getData()).getTitle());
 			}
 		};
 	}
@@ -518,9 +628,11 @@ public class PullRequestsView extends ViewPart {
 	}
 
 	private void showMessage(String message) {
-		MyTitleAreaDialog dialog = new MyTitleAreaDialog(viewerPullRequests.getControl().getShell());
-		dialog.create();
-		dialog.open();
+		/*
+		 * MyTitleAreaDialog dialog = new MyTitleAreaDialog(viewerPullRequests.getControl().getShell());
+		 * dialog.create();
+		 * dialog.open();
+		 */
 		MessageDialog.openInformation(viewerPullRequests.getControl().getShell(), "Pull Requests", message);
 	}
 
