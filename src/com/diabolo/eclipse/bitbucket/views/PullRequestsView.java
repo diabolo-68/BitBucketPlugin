@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -18,6 +17,9 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -26,6 +28,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -34,15 +37,15 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IActionBars;
@@ -53,21 +56,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 
-import com.diabolo.eclipse.bitbucket.MyTitleAreaDialog;
 import com.diabolo.eclipse.bitbucket.Services;
 import com.diabolo.eclipse.bitbucket.valuePair;
 import com.diabolo.eclipse.bitbucket.api.objects.Projects;
 import com.diabolo.eclipse.bitbucket.api.objects.PullrequestValue;
 import com.diabolo.eclipse.bitbucket.api.objects.Pullrequests;
 import com.diabolo.eclipse.bitbucket.api.objects.Repositories;
-import com.google.gson.JsonArray;
-
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.layout.FillLayout;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -265,11 +260,12 @@ public class PullRequestsView extends ViewPart {
 
 								pullRequestValues.forEach(prValue -> {
 
-									String treeName = String.format("%s - %s", prValue.getTitle(), prValue.getAuthor().getUser().getDisplayName());
+									String treeName = String.format("%s - %s", prValue.getTitle(),
+											prValue.getAuthor().getUser().getDisplayName());
 
 									if (!txtFilter.getText().isBlank()) {
 
-										switch(cboFilterOn.getSelectionIndex()) {
+										switch (cboFilterOn.getSelectionIndex()) {
 										case 0:
 											if (prValue.getTitle().contains(txtFilter.getText())) {
 												TreeObject pullRequest = new TreeObject(treeName, prValue);
@@ -327,7 +323,7 @@ public class PullRequestsView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		parent.setLayout(new GridLayout(6, false));
+		parent.setLayout(new GridLayout(4, false));
 
 		// TODO: Check if PR can be merged, highlight the PR if conflict
 
@@ -348,7 +344,7 @@ public class PullRequestsView extends ViewPart {
 		cboProjects.setText("Project");
 		projectsValues.forEach(project -> {
 			cboProjects.add(project.getName());
-			cboProjects.setData(project.getName(),project);
+			cboProjects.setData(project.getName(), project);
 		});
 
 		cboProjects.select(0);
@@ -361,6 +357,7 @@ public class PullRequestsView extends ViewPart {
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
 		Button btnRefresh = new Button(parent, SWT.NONE);
+		btnRefresh.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		btnRefresh.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -380,17 +377,12 @@ public class PullRequestsView extends ViewPart {
 
 		btnRefresh.setText("Refresh list");
 
-		new Label(parent, SWT.NONE);
-		new Label(parent, SWT.NONE);
-
 		cboRepositories = new Combo(parent, SWT.NONE);
 		cboRepositories.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
 		cboRepositories.setText("Repository");
 
 		fillCboRepositories(cboProjects.getItem(cboProjects.getSelectionIndex()).toString());
-
-		new Label(parent, SWT.NONE);
 
 		Label lblFilterOn_2 = new Label(parent, SWT.NONE);
 		lblFilterOn_2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -399,17 +391,22 @@ public class PullRequestsView extends ViewPart {
 		ComboViewer comboViewer = new ComboViewer(parent, SWT.NONE);
 		cboFilterOn = comboViewer.getCombo();
 		cboFilterOn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		cboFilterOn.setItems(new String[] {"Pull Request Title", "Source Branch", "Target Branch"});
+		cboFilterOn.setItems(new String[] { "Pull Request Title", "Source Branch", "Target Branch" });
 		cboFilterOn.setToolTipText("Select on which element the filter must apply to");
 		cboFilterOn.select(0);
 		new Label(parent, SWT.NONE);
-		new Label(parent, SWT.NONE);
 
-		ScrolledComposite scPullRequestsViewer = new ScrolledComposite(parent,
-				SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		scPullRequestsViewer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true, 4, 1));
-		scPullRequestsViewer.setExpandHorizontal(true);
-		scPullRequestsViewer.setExpandVertical(true);
+		Composite scPullRequestsViewer = new Composite(parent,
+				SWT.BORDER | SWT.EMBEDDED);
+		
+		scPullRequestsViewer.setLayout(new FillLayout(SWT.HORIZONTAL));
+		scPullRequestsViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
+
+		// Define the layout of the table*
+
+		TableLayout tlayout = new TableLayout();
+		tlayout.addColumnData(new ColumnWeightData(20, true));
+		tlayout.addColumnData(new ColumnWeightData(80, false));
 		viewerPullRequests = new TreeViewer(scPullRequestsViewer, SWT.NONE);
 		viewerPullRequests.setExpandPreCheckFilters(true);
 		viewerPullRequests.setAutoExpandLevel(10);
@@ -424,78 +421,69 @@ public class PullRequestsView extends ViewPart {
 		// Create the help context id for the viewer's control
 		workbench.getHelpSystem().setHelp(viewerPullRequests.getControl(), "com.diabolo.eclipse.bitbucket.viewer");
 		getSite().setSelectionProvider(viewerPullRequests);
-		scPullRequestsViewer.setContent(treePullRequests);
+		
+				tableViewer = new TableViewer(scPullRequestsViewer);
+				Table table = tableViewer.getTable();
+				table.setLinesVisible(true);
+				table.setHeaderVisible(true);
+				
+						tableViewer.setContentProvider(new ArrayContentProvider());
+						
+								tableViewer.getTable().setLayout(tlayout);
+								//scrolledComposite.setMinSize(table.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
+								// For very element to display, we will select what to display
+								// in function of the column index
+								tableViewer.setLabelProvider(new ITableLabelProvider() {
 
-		tableViewer = new TableViewer(parent);
-		Table table = tableViewer.getTable();
-		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+									@Override
+									public void removeListener(ILabelProviderListener arg0) {
+										// nothing
+									}
 
-		// Define the layout of the table*
+									@Override
+									public boolean isLabelProperty(Object arg0, String arg1) {
+										return false;
+									}
 
-		TableLayout tlayout = new TableLayout();
-		tlayout.addColumnData( new ColumnWeightData( 50, 100, true ));
-		tlayout.addColumnData( new ColumnWeightData( 50, 200, true ));
+									@Override
+									public void dispose() {
+										// nothing
+									}
 
+									@Override
+									public void addListener(ILabelProviderListener arg0) {
+										// nothing
+									}
+
+									@Override
+									public String getColumnText(Object element, int colmnIndex) {
+
+										String result = null;
+										switch (colmnIndex) {
+										case 0:
+											result = ((valuePair) element).getKey();
+											break;
+
+										case 1:
+											result = ((valuePair) element).getValue();
+											break;
+										}
+										return result;
+									}
+
+									@Override
+									public Image getColumnImage(Object element, int colmnIndex) {
+										return null;
+									}
+								});
 
 		String[] COLUMNS = new String[] { "Element", "Value" };
 
-		for( String element : COLUMNS ) {
-			TableColumn col = new TableColumn( tableViewer.getTable(), SWT.CENTER );
-			col.setText( element);
+		for (String element : COLUMNS) {
+			TableColumn col = new TableColumn(tableViewer.getTable(), SWT.FILL);
+			col.setText(element);
 		}
-		
-		tableViewer.setContentProvider( new ArrayContentProvider());
-
-		tableViewer.getTable().setLayout(tlayout);
-
-		// For very element to display, we will select what to display
-		// in function of the column index
-		tableViewer.setLabelProvider( new ITableLabelProvider() {
-
-			@Override
-			public void removeListener( ILabelProviderListener arg0 ) {
-				// nothing
-			}
-
-			@Override
-			public boolean isLabelProperty( Object arg0, String arg1 ) {
-				return false;
-			}
-
-			@Override
-			public void dispose() {
-				// nothing
-			}
-
-			@Override
-			public void addListener( ILabelProviderListener arg0 ) {
-				// nothing
-			}
-
-			@Override
-			public String getColumnText( Object element, int colmnIndex ) {
-
-				String result = null;
-				switch( colmnIndex ) {
-				case 0:
-					result = ((valuePair) element).getKey();
-					break;
-
-				case 1:
-					result = ((valuePair) element).getValue();
-					break;
-				}
-				return result;
-			}
-
-			@Override
-			public Image getColumnImage( Object element, int colmnIndex ) {
-				return null;
-			}
-		});
-
-
 
 		makeActions();
 		hookContextMenu();
@@ -602,20 +590,16 @@ public class PullRequestsView extends ViewPart {
 				IStructuredSelection selection = viewerPullRequests.getStructuredSelection();
 				TreeObject obj = (TreeObject) selection.getFirstElement();
 
-				valuePair [] currentLine = new valuePair [3] ;
+				valuePair[] currentLine = new valuePair[3];
 
 				PullrequestValue prValue = ((PullrequestValue) obj.getData());
 
-
-				currentLine [0] = new valuePair("Data 1", prValue.getAuthor().getUser().getName());
-				currentLine [1] = new valuePair("Data 2", prValue.getTitle());
-				currentLine [2] = new valuePair("Data 3", prValue.getFromRef().getId());
+				currentLine[0] = new valuePair("Author", prValue.getAuthor().getUser().getDisplayName());
+				currentLine[1] = new valuePair("Title", prValue.getTitle());
+				currentLine[2] = new valuePair("Branch", prValue.getFromRef().getId());
 
 				tableViewer.setInput(currentLine);
-				tableViewer.refresh();
-
-				//showMessage("\nDouble-click detected on " + ((PullrequestValue) obj.getData()).getTitle());
-			}
+				tableViewer.refresh();			}
 		};
 	}
 
@@ -629,9 +613,9 @@ public class PullRequestsView extends ViewPart {
 
 	private void showMessage(String message) {
 		/*
-		 * MyTitleAreaDialog dialog = new MyTitleAreaDialog(viewerPullRequests.getControl().getShell());
-		 * dialog.create();
-		 * dialog.open();
+		 * MyTitleAreaDialog dialog = new
+		 * MyTitleAreaDialog(viewerPullRequests.getControl().getShell());
+		 * dialog.create(); dialog.open();
 		 */
 		MessageDialog.openInformation(viewerPullRequests.getControl().getShell(), "Pull Requests", message);
 	}
