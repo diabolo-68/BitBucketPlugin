@@ -52,10 +52,7 @@ public class BitBucketPreferencePage
 				new StringFieldEditor(PreferenceConstants.P_BBUSER, "BitBucket Username:", getFieldEditorParent()));
 
 		addField(
-				new StringFieldEditor(PreferenceConstants.P_BBPASSWORD, "BitBucket Password:", getFieldEditorParent()));
-
-		/*addField(
-				new StringFieldEditor(PreferenceConstants.P_BBPASSWORD, "Password", getFieldEditorParent()) {
+				new StringFieldEditor(PreferenceConstants.P_BBPASSWORD, "BitBucket Password:", getFieldEditorParent()) {
 
 			@Override
 			    protected void doFillIntoGrid(Composite parent, int numColumns) {
@@ -65,7 +62,7 @@ public class BitBucketPreferencePage
 			    }
 
 			});
-		*/
+		
 		System.out.println(PreferenceConstants.P_HOST);
 		System.out.println(PreferenceConstants.P_PROTOCOL);
 		System.out.println(PreferenceConstants.P_BBUSER);

@@ -17,6 +17,7 @@ import com.diabolo.eclipse.bitbucket.api.objects.Pullrequests;
 import com.diabolo.eclipse.bitbucket.api.objects.Repositories;
 import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 public class Services {
 
@@ -87,90 +88,127 @@ public class Services {
 		};
 	}
 
-	private HttpURLConnection setBaseConnection(httpMethod method) throws IOException {
+	private HttpURLConnection setBaseConnection(httpMethod method) {
 		
-        HttpURLConnection connection = (HttpURLConnection) this.url.openConnection();
-        connection.setRequestMethod(method.toString());
-        connection.setDoOutput(true);
-        connection.setRequestProperty ("Authorization", this.auth);
-        connection.setRequestProperty ("Accept", "application/json");
-        connection.setRequestProperty ("Content-Type", "application/json");
-        return connection;
+        HttpURLConnection connection;
+		try {
+			connection = (HttpURLConnection) this.url.openConnection();
+			connection.setRequestMethod(method.toString());
+			connection.setDoOutput(true);
+			connection.setRequestProperty ("Authorization", this.auth);
+			connection.setRequestProperty ("Accept", "application/json");
+			connection.setRequestProperty ("Content-Type", "application/json");
+			return connection;
+		} catch (IOException e) {
+			return null;
+		}
 	}
 
-	private StringBuffer getHttpResponse(HttpURLConnection connection) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+	private StringBuffer getHttpResponse(HttpURLConnection connection) {
+        BufferedReader in;
+		try {
+			in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			StringBuffer sb = new StringBuffer();
+			String s = "";
+			while ((s = in.readLine()) != null) {
+				sb.append(s);
+			}
+			
+			return sb;
+		} catch (IOException e) {
+			return null;
+		}
 
-        StringBuffer sb = new StringBuffer();
-        String s = "";
-        while ((s = in.readLine()) != null) {
-            sb.append(s);
-        }
-        
-        return sb;
 	}
 	
-	public Pullrequests GetPullRequests(pullRequestState state) throws IOException {
+	public Pullrequests GetPullRequests(pullRequestState state) {
 				
-		setUrl(Api.GET_PULLREQUESTS, UrlProtocol.https , host, basePath, "", "", state.toString());
-		
-	    HttpURLConnection connection = setBaseConnection(httpMethod.GET);
-	        
-	    StringBuffer response = getHttpResponse(connection);
+		try {
+			setUrl(Api.GET_PULLREQUESTS, UrlProtocol.https , host, basePath, "", "", state.toString());
+			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
 			
-	    Gson pullRequestsResponse = new Gson();
-
-	    Pullrequests pullRequests = pullRequestsResponse.fromJson(response.toString(), Pullrequests.class);
+			if (connection.getResponseCode() == 200) {
+				StringBuffer response = getHttpResponse(connection);
+				
+				Gson pullRequestsResponse = new Gson();
+				
+				Pullrequests pullRequests = pullRequestsResponse.fromJson(response.toString(), Pullrequests.class);
+				
+				return pullRequests;	    	
+			}
+			return null;
+			
+		} catch (IOException | JsonSyntaxException e) {
+			return null;
+		}
 		
-		return pullRequests;
         
 	}
 	
-	public Pullrequests GetPullRequestsForRepo(String projectKey, String repositorySlug) throws IOException {
+	public Pullrequests GetPullRequestsForRepo(String projectKey, String repositorySlug) {
 		
-		setUrl(Api.GET_PULLREQUESTS_FOR_REPO, UrlProtocol.https , host, basePath, projectKey, repositorySlug);
-		
-	    HttpURLConnection connection = setBaseConnection(httpMethod.GET);
-	        
-	    StringBuffer response = getHttpResponse(connection);
+		try {
+			setUrl(Api.GET_PULLREQUESTS_FOR_REPO, UrlProtocol.https , host, basePath, projectKey, repositorySlug);
+			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
 			
-	    Gson pullRequestsResponse = new Gson();
-
-	    Pullrequests pullRequests = pullRequestsResponse.fromJson(response.toString(), Pullrequests.class);
+			if (connection.getResponseCode() == 200) {
+				StringBuffer response = getHttpResponse(connection);
+				
+				Gson pullRequestsResponse = new Gson();
+				
+				Pullrequests pullRequests = pullRequestsResponse.fromJson(response.toString(), Pullrequests.class);
+				
+				return pullRequests;
+			}    	        
+			return null;
+		} catch (IOException | JsonSyntaxException e) {
+			return null;
+		}
 		
-		return pullRequests;
-        
 	}
 
-	public Projects GetProjects() throws IOException {
+	public Projects GetProjects() {
 		
-		setUrl(Api.GET_PROJECTS, UrlProtocol.https , host, basePath);
-		
-		HttpURLConnection connection = setBaseConnection(httpMethod.GET);
-	        
-	    StringBuffer response = getHttpResponse(connection);
+		try {
+			setUrl(Api.GET_PROJECTS, UrlProtocol.https , host, basePath);
+			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
 			
-	    Gson projectsResponse = new Gson();
-
-	    Projects projects = projectsResponse.fromJson(response.toString(), Projects.class);
+			if (connection.getResponseCode() == 200) {
+				StringBuffer response = getHttpResponse(connection);
+				
+				Gson projectsResponse = new Gson();
+				
+				Projects projects = projectsResponse.fromJson(response.toString(), Projects.class);
+				
+				return projects;
+			}
+			
+			return null;
+		} catch (IOException | JsonSyntaxException e) {
+			return null;
+		}
 		
-		return projects;
-        
 	}
 		
-	public Repositories GetRepositories() throws IOException {
+	public Repositories GetRepositories() {
 		
-		setUrl(Api.GET_REPOSITORIES, UrlProtocol.https , host, basePath);
-		
-		HttpURLConnection connection = setBaseConnection(httpMethod.GET);
-	        
-	    StringBuffer response = getHttpResponse(connection);
+		try {
+			setUrl(Api.GET_REPOSITORIES, UrlProtocol.https , host, basePath);
+			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
 			
-	    Gson repositoriesResponse = new Gson();
-
-	    Repositories repositories = repositoriesResponse.fromJson(response.toString(), Repositories.class);
-		
-		return repositories;
-        
+			if (connection.getResponseCode() == 200) {
+				StringBuffer response = getHttpResponse(connection);
+				
+				Gson repositoriesResponse = new Gson();
+				
+				Repositories repositories = repositoriesResponse.fromJson(response.toString(), Repositories.class);
+				
+				return repositories;
+			}		
+			
+			return null;
+		} catch (IOException | JsonSyntaxException e) {
+			return null;
+		}
 	}
 }
