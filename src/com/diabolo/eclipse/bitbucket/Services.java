@@ -15,6 +15,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import com.diabolo.eclipse.bitbucket.api.objects.Projects;
 import com.diabolo.eclipse.bitbucket.api.objects.Pullrequests;
 import com.diabolo.eclipse.bitbucket.api.objects.Repositories;
+import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -145,7 +146,7 @@ public class Services {
         
 	}
 	
-	public Pullrequests GetPullRequestsForRepo(String projectKey, String repositorySlug) {
+	public PullRequestForRepository GetPullRequestsForRepo(String projectKey, String repositorySlug) {
 		
 		try {
 			setUrl(Api.GET_PULLREQUESTS_FOR_REPO, UrlProtocol.https , host, basePath, projectKey, repositorySlug);
@@ -156,7 +157,7 @@ public class Services {
 				
 				Gson pullRequestsResponse = new Gson();
 				
-				Pullrequests pullRequests = pullRequestsResponse.fromJson(response.toString(), Pullrequests.class);
+				PullRequestForRepository pullRequests = pullRequestsResponse.fromJson(response.toString(), PullRequestForRepository.class);
 				
 				return pullRequests;
 			}    	        

@@ -59,10 +59,11 @@ import com.diabolo.eclipse.bitbucket.Services;
 import com.diabolo.eclipse.bitbucket.valuePair;
 import com.diabolo.eclipse.bitbucket.api.objects.ProjectValue;
 import com.diabolo.eclipse.bitbucket.api.objects.Projects;
-import com.diabolo.eclipse.bitbucket.api.objects.PullrequestValue;
 import com.diabolo.eclipse.bitbucket.api.objects.Pullrequests;
 import com.diabolo.eclipse.bitbucket.api.objects.Repositories;
 import com.diabolo.eclipse.bitbucket.api.objects.RepositoryValue;
+import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
+import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value;
 
 public class PullRequestsView extends ViewPart {
 
@@ -247,7 +248,6 @@ public class PullRequestsView extends ViewPart {
 
 			@Override
 			public void handleEvent(Event arg0) {
-				// TODO: move Refresh Viewer to cbRepo update
 				try {
 					
 					invisibleRoot = null;
@@ -319,10 +319,10 @@ public class PullRequestsView extends ViewPart {
 		int idxProject = cboProjects.getSelectionIndex();
 		int idxRepositories = cboRepositories.getSelectionIndex();
 
-		RepositoryValue repositoryValue = new RepositoryValue();
+		Value repositoryValue = new Value();
 		
 		if (cboRepositories.getData(cboRepositories.getItem(idxRepositories).toString()) instanceof RepositoryValue) {
-			repositoryValue = (RepositoryValue) cboRepositories.getData(cboRepositories.getItem(idxRepositories).toString()); 
+			repositoryValue = (Value) cboRepositories.getData(cboRepositories.getItem(idxRepositories).toString()); 
 		} 
 
 		ProjectValue projectValue = new ProjectValue();
@@ -332,15 +332,15 @@ public class PullRequestsView extends ViewPart {
 		} 
 
 		final ProjectValue currentProjectValue = projectValue;
-		final RepositoryValue currentRepositoryValue = repositoryValue;
+		final Value currentRepositoryValue = repositoryValue;
 		
 		if (repositoriesValues.size() > 0) {
 
 			repositoriesValues.forEach(repository -> {
 
-				Pullrequests pullRequests;
+				PullRequestForRepository pullRequests;
 				
-				List<com.diabolo.eclipse.bitbucket.api.objects.PullrequestValue> pullRequestValues;
+				List<com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value> pullRequestValues;
 
 				if (cboProjects.getItemCount() > 0 && cboRepositories.getItemCount() > 0) {
 
@@ -525,7 +525,7 @@ public class PullRequestsView extends ViewPart {
 
 				valuePair[] currentLine = new valuePair[20];
 
-				PullrequestValue prValue = ((PullrequestValue) obj.getData());
+				Value prValue = ((Value) obj.getData());
 
 				currentLine[0] = new valuePair("Author", prValue.getAuthor().getUser().getDisplayName());
 				currentLine[1] = new valuePair("Title", prValue.getTitle());
@@ -555,11 +555,10 @@ public class PullRequestsView extends ViewPart {
 					 */
 					
 					if (reviewerCounter.get() < 20) {
-						//TODO: Add GetUser() in Reviewer Pojo
 						String reviewerStatus = reviewer.getStatus().toString();
 						
 						if (!reviewerStatus.equalsIgnoreCase("UNAPPROVED")) {
-							currentLine[reviewerCounter.get()] = new valuePair("Reviewer #"+reviewerCounter.get(), reviewerStatus);
+							currentLine[reviewerCounter.get()] = new valuePair(reviewer.getUser().getDisplayName(), reviewerStatus);
 							reviewerCounter.getAndIncrement();
 						}
 					}
@@ -602,7 +601,7 @@ public class PullRequestsView extends ViewPart {
 				    	   IStructuredSelection selection = viewerPullRequests.getStructuredSelection();						
 				    	   PullRequestsTreeObject obj = (PullRequestsTreeObject) selection.getFirstElement();
 				    	   if (obj != null) {
-				    		   if (obj.getData() instanceof PullrequestValue) {
+				    		   if (obj.getData() instanceof Value) {
 				    			   PullRequestdoubleClickAction.run();
 				    		   }
 				    	   }
