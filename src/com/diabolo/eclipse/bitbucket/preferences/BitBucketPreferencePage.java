@@ -4,7 +4,7 @@ import org.eclipse.jface.preference.*;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.diabolo.eclipse.bitbucket.api.objects.Activator;
+import com.diabolo.eclipse.bitbucket.Activator;
 
 import org.eclipse.ui.IWorkbench;
 

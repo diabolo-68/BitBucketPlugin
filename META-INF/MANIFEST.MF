@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Bitbucket
 Bundle-SymbolicName: com.diabolo.eclipse.bitbucket;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.diabolo.eclipse.bitbucket.api.objects.Activator
+Bundle-Activator: com.diabolo.eclipse.bitbucket.Activator
 Bundle-ClassPath: .,
  swing2swt.jar
 Require-Bundle: org.eclipse.ui,
