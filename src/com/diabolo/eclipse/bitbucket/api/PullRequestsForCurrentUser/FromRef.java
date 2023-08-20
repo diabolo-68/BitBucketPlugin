@@ -1,5 +1,5 @@
 
-package com.diabolo.eclipse.bitbucket.api.objects;
+package com.diabolo.eclipse.bitbucket.api.PullRequestsForCurrentUser;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;

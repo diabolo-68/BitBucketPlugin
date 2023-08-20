@@ -1,12 +1,12 @@
 
-package com.diabolo.eclipse.bitbucket.api.objects;
+package com.diabolo.eclipse.bitbucket.api.PullRequestsForCurrentUser;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("jsonschema2pojo")
-public class RepositoryValue {
+public class Repository {
 
     @SerializedName("slug")
     @Expose
@@ -17,9 +17,6 @@ public class RepositoryValue {
     @SerializedName("name")
     @Expose
     private String name;
-    @SerializedName("description")
-    @Expose
-    private String description;
     @SerializedName("hierarchyId")
     @Expose
     private String hierarchyId;
@@ -37,14 +34,17 @@ public class RepositoryValue {
     private Boolean forkable;
     @SerializedName("project")
     @Expose
-    private Repository project;
+    private Project project;
     @SerializedName("public")
     @Expose
     private Boolean _public;
     @SerializedName("archived")
     @Expose
     private Boolean archived;
- 
+    @SerializedName("links")
+    @Expose
+    private Links links;
+
     public String getSlug() {
         return slug;
     }
@@ -67,14 +67,6 @@ public class RepositoryValue {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getHierarchyId() {
@@ -117,11 +109,11 @@ public class RepositoryValue {
         this.forkable = forkable;
     }
 
-    public Repository getProject() {
+    public Project getProject() {
         return project;
     }
 
-    public void setProject(Repository project) {
+    public void setProject(Project project) {
         this.project = project;
     }
 
@@ -139,6 +131,14 @@ public class RepositoryValue {
 
     public void setArchived(Boolean archived) {
         this.archived = archived;
+    }
+
+    public Links getLinks() {
+        return links;
+    }
+
+    public void setLinks(Links links) {
+        this.links = links;
     }
 
 }

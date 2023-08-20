@@ -5,16 +5,15 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.http.HttpClient;
 import java.util.Base64;
 
 import org.apache.commons.httpclient.HttpConstants;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import com.diabolo.eclipse.bitbucket.api.objects.Projects;
-import com.diabolo.eclipse.bitbucket.api.objects.Pullrequests;
-import com.diabolo.eclipse.bitbucket.api.objects.Repositories;
+import com.diabolo.eclipse.bitbucket.api.Projects.Projects;
+import com.diabolo.eclipse.bitbucket.api.PullRequestsForCurrentUser.PullRequestsForCurrentUser;
+import com.diabolo.eclipse.bitbucket.api.Repositories.Repositories;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
 import com.google.gson.Gson;
@@ -67,7 +66,7 @@ public class Services {
 		this.RepositorySlug = repositorySlug;
 		
 		switch (apiName) {
-			case GET_PULLREQUESTS:
+			case GET_PULLREQUESTS_FOR_CURRENT_USER:
 				//System.out.printf("%s://%s/%s/api/latest/dashboard/pull-requests?limit=1000",protocol,host, basePath);
 				this.url = new URL(String.format("%s://%s/%s/api/latest/dashboard/pull-requests?limit=1000&state=%s",protocol,host, basePath, filter)); 
 				//{{protocol}}://{{host}}/{{basePath}}api/latest/dashboard/pull-requests
@@ -122,10 +121,10 @@ public class Services {
 
 	}
 	
-	public Pullrequests GetPullRequests(pullRequestState state) {
+	public PullRequestsForCurrentUser GetPullRequests(pullRequestState state) {
 				
 		try {
-			setUrl(Api.GET_PULLREQUESTS, UrlProtocol.https , host, basePath, "", "", state.toString());
+			setUrl(Api.GET_PULLREQUESTS_FOR_CURRENT_USER, UrlProtocol.https , host, basePath, "", "", state.toString());
 			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
 			
 			if (connection.getResponseCode() == 200) {
@@ -133,7 +132,7 @@ public class Services {
 				
 				Gson pullRequestsResponse = new Gson();
 				
-				Pullrequests pullRequests = pullRequestsResponse.fromJson(response.toString(), Pullrequests.class);
+				PullRequestsForCurrentUser pullRequests = pullRequestsResponse.fromJson(response.toString(), PullRequestsForCurrentUser.class);
 				
 				return pullRequests;	    	
 			}

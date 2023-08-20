@@ -1,6 +1,5 @@
 package com.diabolo.eclipse.bitbucket.views;
 
-import java.awt.Color;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -47,8 +46,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
@@ -57,11 +54,8 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.diabolo.eclipse.bitbucket.Services;
 import com.diabolo.eclipse.bitbucket.valuePair;
-import com.diabolo.eclipse.bitbucket.api.objects.ProjectValue;
-import com.diabolo.eclipse.bitbucket.api.objects.Projects;
-import com.diabolo.eclipse.bitbucket.api.objects.Pullrequests;
-import com.diabolo.eclipse.bitbucket.api.objects.Repositories;
-import com.diabolo.eclipse.bitbucket.api.objects.RepositoryValue;
+import com.diabolo.eclipse.bitbucket.api.Projects.Projects;
+import com.diabolo.eclipse.bitbucket.api.Repositories.Repositories;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value;
 
@@ -81,8 +75,8 @@ public class PullRequestsView extends ViewPart {
 	private Action expandAllAction;
 	private Action PullRequestdoubleClickAction;
 	private Text txtFilter;
-	private List<com.diabolo.eclipse.bitbucket.api.objects.ProjectValue> projectsValues;
-	private List<com.diabolo.eclipse.bitbucket.api.objects.RepositoryValue> repositoriesValues;
+	private List<com.diabolo.eclipse.bitbucket.api.Projects.Value> projectsValues;
+	private List<com.diabolo.eclipse.bitbucket.api.Repositories.Value> repositoriesValues;
 	private Services services = new Services();
 	private Combo cboRepositories;
 	private Combo cboProjects;
@@ -319,44 +313,44 @@ public class PullRequestsView extends ViewPart {
 		int idxProject = cboProjects.getSelectionIndex();
 		int idxRepositories = cboRepositories.getSelectionIndex();
 
-		Value repositoryValue = new Value();
+		com.diabolo.eclipse.bitbucket.api.Repositories.Value repositoryValue = new com.diabolo.eclipse.bitbucket.api.Repositories.Value();
 		
-		if (cboRepositories.getData(cboRepositories.getItem(idxRepositories).toString()) instanceof RepositoryValue) {
-			repositoryValue = (Value) cboRepositories.getData(cboRepositories.getItem(idxRepositories).toString()); 
+		if (cboRepositories.getData(cboRepositories.getItem(idxRepositories).toString()) instanceof com.diabolo.eclipse.bitbucket.api.Repositories.Value) {
+			repositoryValue = (com.diabolo.eclipse.bitbucket.api.Repositories.Value) cboRepositories.getData(cboRepositories.getItem(idxRepositories).toString()); 
 		} 
 
-		ProjectValue projectValue = new ProjectValue();
+		com.diabolo.eclipse.bitbucket.api.Projects.Value projectValue = new com.diabolo.eclipse.bitbucket.api.Projects.Value();
 		
-		if (cboProjects.getData(cboProjects.getItem(idxProject).toString()) instanceof ProjectValue) {
-			projectValue = (ProjectValue) cboProjects.getData(cboProjects.getItem(idxProject).toString()); 
+		if (cboProjects.getData(cboProjects.getItem(idxProject).toString()) instanceof com.diabolo.eclipse.bitbucket.api.Projects.Value) {
+			projectValue = (com.diabolo.eclipse.bitbucket.api.Projects.Value) cboProjects.getData(cboProjects.getItem(idxProject).toString()); 
 		} 
 
-		final ProjectValue currentProjectValue = projectValue;
-		final Value currentRepositoryValue = repositoryValue;
+		final com.diabolo.eclipse.bitbucket.api.Projects.Value currentProjectValue = projectValue;
+		final com.diabolo.eclipse.bitbucket.api.Repositories.Value currentRepositoryValue = repositoryValue;
 		
 		if (repositoriesValues.size() > 0) {
-
+System.out.println("1");
 			repositoriesValues.forEach(repository -> {
-
+System.out.println("2");
 				PullRequestForRepository pullRequests;
 				
 				List<com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value> pullRequestValues;
 
 				if (cboProjects.getItemCount() > 0 && cboRepositories.getItemCount() > 0) {
-
+System.out.println("3");
 					String cboRepositoriesValue = repository.getProject().getName() + " / " + repository.getName();
 
 					if (idxRepositories == 0 || currentRepositoryValue.getId() == repository.getId()) {
-						
+System.out.println("4");						
 						if (idxProject == 0	|| repository.getProject().getId().compareTo(currentProjectValue.getId()) == 0) {
-						
+System.out.println("idxProject=" + idxProject );						
 							pullRequests = services.GetPullRequestsForRepo(repository.getProject().getKey(), repository.getName());
-
+System.out.println("pullRequests="+pullRequests);
 							if (pullRequests != null) {
-								
+System.out.println("6");								
 								pullRequestValues = pullRequests.getValues();
 								if (pullRequestValues.size() > 0) {
-									
+System.out.println("7");									
 									PullRequestsTreeParent repositoryTree = new PullRequestsTreeParent(cboRepositoriesValue);
 
 									pullRequestValues.forEach(prValue -> {
@@ -389,6 +383,7 @@ public class PullRequestsView extends ViewPart {
 												break;
 											}
 										} else {
+System.out.println("8");											
 											PullRequestsTreeObject pullRequest = new PullRequestsTreeObject(treeName, prValue);
 											repositoryTree.addChild(pullRequest);
 										}
@@ -416,7 +411,7 @@ public class PullRequestsView extends ViewPart {
 
 		cboRepositories.add("All");
 
-		ProjectValue projectValue = (ProjectValue) cboProjects.getData(cboProjects.getItem(cboProjects.getSelectionIndex())); 
+		com.diabolo.eclipse.bitbucket.api.Projects.Value projectValue = (com.diabolo.eclipse.bitbucket.api.Projects.Value) cboProjects.getData(cboProjects.getItem(cboProjects.getSelectionIndex())); 
 		
 		if (repositoriesValues.size() > 1) {
 			repositoriesValues.forEach(repository -> {

@@ -1,14 +1,13 @@
 
-package com.diabolo.eclipse.bitbucket.api.objects;
+package com.diabolo.eclipse.bitbucket.api.PullRequestsForCurrentUser;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("jsonschema2pojo")
-public class PullrequestValue {
+public class Value {
 
     @SerializedName("id")
     @Expose
@@ -51,13 +50,16 @@ public class PullrequestValue {
     private Author author;
     @SerializedName("reviewers")
     @Expose
-    private List<Reviewer> reviewers = new ArrayList<Reviewer>();
+    private List<Object> reviewers;
     @SerializedName("participants")
     @Expose
-    private List<Object> participants = new ArrayList<Object>();
+    private List<Object> participants;
     @SerializedName("properties")
     @Expose
     private Properties properties;
+    @SerializedName("links")
+    @Expose
+    private Links links;
 
     public Integer getId() {
         return id;
@@ -163,11 +165,11 @@ public class PullrequestValue {
         this.author = author;
     }
 
-    public List<Reviewer> getReviewers() {
+    public List<Object> getReviewers() {
         return reviewers;
     }
 
-    public void setReviewers(List<Reviewer> reviewers) {
+    public void setReviewers(List<Object> reviewers) {
         this.reviewers = reviewers;
     }
 
@@ -185,6 +187,14 @@ public class PullrequestValue {
 
     public void setProperties(Properties properties) {
         this.properties = properties;
+    }
+
+    public Links getLinks() {
+        return links;
+    }
+
+    public void setLinks(Links links) {
+        this.links = links;
     }
 
 }

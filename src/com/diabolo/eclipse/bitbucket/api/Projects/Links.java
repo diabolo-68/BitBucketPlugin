@@ -1,5 +1,5 @@
 
-package com.diabolo.eclipse.bitbucket.api.objects;
+package com.diabolo.eclipse.bitbucket.api.Projects;
 
 import java.util.List;
 import javax.annotation.Generated;
