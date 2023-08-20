@@ -38,6 +38,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -305,9 +306,6 @@ public class PullRequestsView extends ViewPart {
 	private void initializeTreeView() {
 		invisibleRoot = null;
 		
-		if (repositoriesValues == null) {
-			
-		}
 		PullRequestsTreeParent root = new PullRequestsTreeParent("");
 
 		int idxProject = cboProjects.getSelectionIndex();
@@ -329,28 +327,20 @@ public class PullRequestsView extends ViewPart {
 		final com.diabolo.eclipse.bitbucket.api.Repositories.Value currentRepositoryValue = repositoryValue;
 		
 		if (repositoriesValues.size() > 0) {
-System.out.println("1");
 			repositoriesValues.forEach(repository -> {
-System.out.println("2");
 				PullRequestForRepository pullRequests;
 				
 				List<com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value> pullRequestValues;
 
 				if (cboProjects.getItemCount() > 0 && cboRepositories.getItemCount() > 0) {
-System.out.println("3");
 					String cboRepositoriesValue = repository.getProject().getName() + " / " + repository.getName();
 
 					if (idxRepositories == 0 || currentRepositoryValue.getId() == repository.getId()) {
-System.out.println("4");						
 						if (idxProject == 0	|| repository.getProject().getId().compareTo(currentProjectValue.getId()) == 0) {
-System.out.println("idxProject=" + idxProject );						
 							pullRequests = services.GetPullRequestsForRepo(repository.getProject().getKey(), repository.getName());
-System.out.println("pullRequests="+pullRequests);
 							if (pullRequests != null) {
-System.out.println("6");								
 								pullRequestValues = pullRequests.getValues();
 								if (pullRequestValues.size() > 0) {
-System.out.println("7");									
 									PullRequestsTreeParent repositoryTree = new PullRequestsTreeParent(cboRepositoriesValue);
 
 									pullRequestValues.forEach(prValue -> {
@@ -383,10 +373,10 @@ System.out.println("7");
 												break;
 											}
 										} else {
-System.out.println("8");											
 											PullRequestsTreeObject pullRequest = new PullRequestsTreeObject(treeName, prValue);
 											repositoryTree.addChild(pullRequest);
 										}
+										
 									});
 
 									root.addChild(repositoryTree);
@@ -522,10 +512,11 @@ System.out.println("8");
 
 				Value prValue = ((Value) obj.getData());
 
+				String pullRequestState = prValue.getProperties().getMergeResult().getOutcome();
 				currentLine[0] = new valuePair("Author", prValue.getAuthor().getUser().getDisplayName());
 				currentLine[1] = new valuePair("Title", prValue.getTitle());
 				currentLine[2] = new valuePair("Branch", prValue.getFromRef().getId());
-				currentLine[3] = new valuePair("State", prValue.getProperties().getMergeResult().getOutcome());
+				currentLine[3] = new valuePair("State", pullRequestState);
 				currentLine[4] = new valuePair("Description", prValue.getDescription());
 				
 				/*
@@ -539,7 +530,6 @@ System.out.println("8");
 					
 					currentLine[i] = new valuePair("","");
 					
-					System.out.println("i=" + i);
 				}
 				
 				prValue.getReviewers().forEach(reviewer -> {
@@ -569,13 +559,21 @@ System.out.println("8");
 	            	tableViewer.getTable().getColumn(i).pack();
 	            }
 	            
-	            /*
+
+	            
 	            for (int i = 0, n = tableViewer.getTable().getItemCount(); i < n; i++) {
-	            	if (i >= 5) {
-	            		tableViewer.getTable().getItem(i).setBackground(new Color());	            		
+	            	tableViewer.getTable().getItem(i).setBackground(0,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
+	            	tableViewer.getTable().getItem(i).setBackground(1,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));	            		
+
+	            	if ((i == 3 && !pullRequestState.contentEquals("CLEAN")) || i == 5) {
+	            		tableViewer.getTable().getItem(i).setForeground(0,Display.getDefault().getSystemColor(SWT.COLOR_YELLOW));
+	            		tableViewer.getTable().getItem(i).setForeground(1,Display.getDefault().getSystemColor(SWT.COLOR_YELLOW));	            		
+	            	} else {
+	            		tableViewer.getTable().getItem(i).setForeground(0,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+	            		tableViewer.getTable().getItem(i).setForeground(1,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));	            		
 	            	}
 	            }
-	            */
+	            
 	            
 	            tableViewer.refresh();
 			}
