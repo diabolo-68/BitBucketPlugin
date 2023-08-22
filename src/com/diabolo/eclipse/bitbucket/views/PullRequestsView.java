@@ -74,7 +74,7 @@ public class PullRequestsView extends ViewPart {
 	private DrillDownAdapter drillDownAdapter;
 	private Action collapseAllAction;
 	private Action expandAllAction;
-	private Action PullRequestdoubleClickAction;
+	private Action PullRequestClickAction;
 	private Text txtFilter;
 	private List<com.diabolo.eclipse.bitbucket.api.Projects.Value> projectsValues;
 	private List<com.diabolo.eclipse.bitbucket.api.Repositories.Value> repositoriesValues;
@@ -330,23 +330,29 @@ public class PullRequestsView extends ViewPart {
 			repositoriesValues.forEach(repository -> {
 				PullRequestForRepository pullRequests;
 				
+				
 				List<com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value> pullRequestValues;
 
 				if (cboProjects.getItemCount() > 0 && cboRepositories.getItemCount() > 0) {
-					String cboRepositoriesValue = repository.getProject().getName() + " / " + repository.getName();
-
+					String repositoryTreeValue = repository.getName();
+					
 					if (idxRepositories == 0 || currentRepositoryValue.getId() == repository.getId()) {
+						
 						if (idxProject == 0	|| repository.getProject().getId().compareTo(currentProjectValue.getId()) == 0) {
 							pullRequests = services.GetPullRequestsForRepo(repository.getProject().getKey(), repository.getName());
+							
 							if (pullRequests != null) {
 								pullRequestValues = pullRequests.getValues();
+	
 								if (pullRequestValues.size() > 0) {
-									PullRequestsTreeParent repositoryTree = new PullRequestsTreeParent(cboRepositoriesValue);
+									
+									PullRequestsTreeParent repositoryTree = new PullRequestsTreeParent(repositoryTreeValue);
 
 									pullRequestValues.forEach(prValue -> {
 
 										String treeName = String.format("%s - %s", prValue.getTitle(),
 												prValue.getAuthor().getUser().getDisplayName());
+									
 										if (!txtFilter.getText().isBlank()) {
 
 											switch (cboFilterOn.getSelectionIndex()) {
@@ -413,7 +419,7 @@ public class PullRequestsView extends ViewPart {
 				
 				if (repository.getProject().getId() == projectValueId || cboProjects.getSelectionIndex() == 0) {
 					if (repository.getProject().getType().compareTo("NORMAL") == 0) {
-						String cboRepositoryValue = repository.getProject().getName() + " / " + repository.getName();
+						String cboRepositoryValue = repository.getName();
 						cboRepositories.add(cboRepositoryValue);
 						cboRepositories.setData(cboRepositoryValue, repository);
 					}
@@ -491,89 +497,85 @@ public class PullRequestsView extends ViewPart {
 		
 		expandAllAction.setText("Expand All");
 		expandAllAction.setToolTipText("Expand Pull Requests List");
-		// expandAllAction.setImageDescriptor(workbench.getSharedImages().getImageDescriptor(ISharedImages.IMG_ELCL_STOP));
 		URL imageUrl;
 		
 		try {
-
 			imageUrl = new URL("platform:/plugin/org.eclipse.xtext.ui/icons/elcl16/expandall.gif");
 			expandAllAction.setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	
-		PullRequestdoubleClickAction = new Action() {
+		PullRequestClickAction = new Action() {
 			public void run() {
+				
 				IStructuredSelection selection = viewerPullRequests.getStructuredSelection();
 				PullRequestsTreeObject obj = (PullRequestsTreeObject) selection.getFirstElement();
 
 				valuePair[] currentLine = new valuePair[20];
 
-				Value prValue = ((Value) obj.getData());
-
-				String pullRequestState = prValue.getProperties().getMergeResult().getOutcome();
-				currentLine[0] = new valuePair("Author", prValue.getAuthor().getUser().getDisplayName());
-				currentLine[1] = new valuePair("Title", prValue.getTitle());
-				currentLine[2] = new valuePair("Branch", prValue.getFromRef().getId());
-				currentLine[3] = new valuePair("State", pullRequestState);
-				currentLine[4] = new valuePair("Description", prValue.getDescription());
-				
-				/*
-				 * Remove table lines 4 to 20
-				 */
 				AtomicInteger reviewerCounter = new AtomicInteger();
 				
 				reviewerCounter.set(5);
 
-				for (int i = reviewerCounter.get(); i < 20; i++) {
-					
-					currentLine[i] = new valuePair("","");
-					
-				}
-				
-				prValue.getReviewers().forEach(reviewer -> {
-				
-					
-					/*
-					 * Count in Lambda Expression
-					 */
-					
-					if (reviewerCounter.get() < 20) {
-						String reviewerStatus = reviewer.getStatus().toString();
-						
-						if (!reviewerStatus.equalsIgnoreCase("UNAPPROVED")) {
-							currentLine[reviewerCounter.get()] = new valuePair(reviewer.getUser().getDisplayName(), reviewerStatus);
-							reviewerCounter.getAndIncrement();
-						}
-					}
-					
-				});
-				
-				tableViewer.setInput(currentLine);
-	            
 				/*
-				 * Resize the columns in regards with the content
+				 * Delete the current table content	
 				 */
-	            for (int i = 0, n = tableViewer.getTable().getColumnCount(); i < n; i++) {
-	            	tableViewer.getTable().getColumn(i).pack();
-	            }
-	            
 
-	            
-	            for (int i = 0, n = tableViewer.getTable().getItemCount(); i < n; i++) {
-	            	tableViewer.getTable().getItem(i).setBackground(0,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
-	            	tableViewer.getTable().getItem(i).setBackground(1,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));	            		
+				for (int i = 0; i < 20; i++) {
+					currentLine[i] = new valuePair("","");
+				}
 
-	            	if ((i == 3 && !pullRequestState.contentEquals("CLEAN")) || i == 5) {
-	            		tableViewer.getTable().getItem(i).setForeground(0,Display.getDefault().getSystemColor(SWT.COLOR_YELLOW));
-	            		tableViewer.getTable().getItem(i).setForeground(1,Display.getDefault().getSystemColor(SWT.COLOR_YELLOW));	            		
-	            	} else {
-	            		tableViewer.getTable().getItem(i).setForeground(0,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-	            		tableViewer.getTable().getItem(i).setForeground(1,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));	            		
-	            	}
-	            }
-	            
+				tableViewer.setInput(currentLine);
+			    	
+				if (obj != null) {
+		    		   if (obj.getData() instanceof Value) {
+		    			   Value prValue = ((Value) obj.getData());
+		    			   
+		    			   String pullRequestState = prValue.getProperties().getMergeResult().getOutcome();
+		    			   currentLine[0] = new valuePair("Author", prValue.getAuthor().getUser().getDisplayName());
+		    			   currentLine[1] = new valuePair("Title", prValue.getTitle());
+		    			   currentLine[2] = new valuePair("Branch", prValue.getFromRef().getId());
+		    			   currentLine[3] = new valuePair("State", pullRequestState);
+		    			   currentLine[4] = new valuePair("Description", prValue.getDescription());
+
+		    			   prValue.getReviewers().forEach(reviewer -> {
+		    				   
+		    				   if (reviewerCounter.get() < 20) {
+		    					   String reviewerStatus = reviewer.getStatus().toString();
+		    					   
+		    					   if (!reviewerStatus.equalsIgnoreCase("UNAPPROVED")) {
+		    						   currentLine[reviewerCounter.get()] = new valuePair(reviewer.getUser().getDisplayName(), reviewerStatus);
+		    						   reviewerCounter.getAndIncrement();
+		    					   }
+		    				   }
+		    				   
+		    			   });
+		    			   
+		    			   tableViewer.setInput(currentLine);
+		    			   
+		    			   /*
+		    			    * Resize the columns in regards with the content
+		    			    */
+		    			   for (int i = 0, n = tableViewer.getTable().getColumnCount(); i < n; i++) {
+		    				   tableViewer.getTable().getColumn(i).pack();
+		    			   }
+		    			   
+		    			   
+		    			   for (int i = 0, n = tableViewer.getTable().getItemCount(); i < n; i++) {
+		    				   tableViewer.getTable().getItem(i).setBackground(0,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
+		    				   tableViewer.getTable().getItem(i).setBackground(1,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));	            		
+		    				   
+		    				   if ((i == 3 && !pullRequestState.contentEquals("CLEAN")) || i == 5) {
+		    					   tableViewer.getTable().getItem(i).setForeground(0,Display.getDefault().getSystemColor(SWT.COLOR_YELLOW));
+		    					   tableViewer.getTable().getItem(i).setForeground(1,Display.getDefault().getSystemColor(SWT.COLOR_YELLOW));	            		
+		    				   } else {
+		    					   tableViewer.getTable().getItem(i).setForeground(0,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		    					   tableViewer.getTable().getItem(i).setForeground(1,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));	            		
+		    				   }
+		    			   }
+		    		   }
+				}
 	            
 	            tableViewer.refresh();
 			}
@@ -582,28 +584,15 @@ public class PullRequestsView extends ViewPart {
 
 	private void hookPullRequestAction() {
 		if (viewerPullRequests != null) {
-			viewerPullRequests.addDoubleClickListener(new IDoubleClickListener() {
-				public void doubleClick(DoubleClickEvent event) {
-					// Nothing yet
-				}
-			});			
 
 			viewerPullRequests.addSelectionChangedListener(new ISelectionChangedListener() {
-				   public void selectionChanged(SelectionChangedEvent event) {
-				       if(event.getSelection() instanceof IStructuredSelection) {
-				    	   IStructuredSelection selection = viewerPullRequests.getStructuredSelection();						
-				    	   PullRequestsTreeObject obj = (PullRequestsTreeObject) selection.getFirstElement();
-				    	   if (obj != null) {
-				    		   if (obj.getData() instanceof Value) {
-				    			   PullRequestdoubleClickAction.run();
-				    		   }
-				    	   }
-
-				       }
-				   }
-				});
-			
-		
+			   public void selectionChanged(SelectionChangedEvent event) {
+			       if(event.getSelection() instanceof IStructuredSelection) {
+			    	   IStructuredSelection selection = viewerPullRequests.getStructuredSelection();						
+			    	   PullRequestClickAction.run();
+			       }
+			   }
+			});
 		}
 	}
 
@@ -622,4 +611,5 @@ public class PullRequestsView extends ViewPart {
 			viewerPullRequests.getControl().setFocus();
 		}
 	}
+
 }

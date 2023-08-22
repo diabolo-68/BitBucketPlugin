@@ -63,12 +63,6 @@ public class BitBucketPreferencePage
 
 			});
 		
-		System.out.println(PreferenceConstants.P_HOST);
-		System.out.println(PreferenceConstants.P_PROTOCOL);
-		System.out.println(PreferenceConstants.P_BBUSER);
-		System.out.println(PreferenceConstants.P_BBPASSWORD);
-		System.out.println(PreferenceConstants.P_BASEPATH);
-
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)

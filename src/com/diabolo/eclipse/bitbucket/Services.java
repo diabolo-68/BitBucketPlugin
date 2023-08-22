@@ -31,7 +31,6 @@ public class Services {
         host = store.getString(PreferenceConstants.P_HOST);
         basePath = store.getString(PreferenceConstants.P_BASEPATH);
         protocol = store.getString(PreferenceConstants.P_PROTOCOL);
-    	//services.setAuth(PreferenceConstants.P_BBUSER,PreferenceConstants.P_BBPASSWORD);
 
 	}
 
@@ -67,7 +66,6 @@ public class Services {
 		
 		switch (apiName) {
 			case GET_PULLREQUESTS_FOR_CURRENT_USER:
-				//System.out.printf("%s://%s/%s/api/latest/dashboard/pull-requests?limit=1000",protocol,host, basePath);
 				this.url = new URL(String.format("%s://%s/%s/api/latest/dashboard/pull-requests?limit=1000&state=%s",protocol,host, basePath, filter)); 
 				//{{protocol}}://{{host}}/{{basePath}}api/latest/dashboard/pull-requests
 				break;
