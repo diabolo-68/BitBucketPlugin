@@ -4,9 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.LogManager;
 
 import javax.inject.Inject;
 
+import org.apache.commons.logging.Log;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -49,10 +51,13 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 
+import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.Services;
 import com.diabolo.eclipse.bitbucket.valuePair;
 import com.diabolo.eclipse.bitbucket.api.Projects.Projects;
@@ -330,7 +335,6 @@ public class PullRequestsView extends ViewPart {
 			repositoriesValues.forEach(repository -> {
 				PullRequestForRepository pullRequests;
 				
-				
 				List<com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value> pullRequestValues;
 
 				if (cboProjects.getItemCount() > 0 && cboRepositories.getItemCount() > 0) {
@@ -584,7 +588,39 @@ public class PullRequestsView extends ViewPart {
 
 	private void hookPullRequestAction() {
 		if (viewerPullRequests != null) {
+			viewerPullRequests.addDoubleClickListener(new IDoubleClickListener() {
+				public void doubleClick(DoubleClickEvent event) {
+				       if(event.getSelection() instanceof IStructuredSelection) {
+				    	   IStructuredSelection selection = viewerPullRequests.getStructuredSelection();						
+				    	   PullRequestsTreeObject obj = (PullRequestsTreeObject) selection.getFirstElement();
+				    	   System.out.println("-1");
+				    	   if (obj != null) {
+				    		   System.out.println("0");
+				    		   if (obj.getData() instanceof Value) {
+				    			   try {
+				    				   System.out.println("1");
+				    				   IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
+				    				   
+				    				   ((Value) obj.getData()).getLinks().getSelf().forEach(currentSelf -> {
+				    					   URL url;
+											try {
+												url = new URL(currentSelf.getHref().toString());
+												browser.openURL(url);
+											} catch (MalformedURLException | PartInitException e) {
+												e.printStackTrace();
+											}
+				    				   });
+				    				   
+				    			   } catch (Exception e) {
+				    				   System.out.println(e);
+				    			   }
+				    		   }
+				    	   }
+				       }
+				       }
+			});			
 
+			
 			viewerPullRequests.addSelectionChangedListener(new ISelectionChangedListener() {
 			   public void selectionChanged(SelectionChangedEvent event) {
 			       if(event.getSelection() instanceof IStructuredSelection) {
