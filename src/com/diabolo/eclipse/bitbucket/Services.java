@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Base64;
 
-import org.apache.commons.httpclient.HttpConstants;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -30,15 +29,11 @@ public class Services {
                 + store.getString(PreferenceConstants.P_BBPASSWORD)).getBytes());;
         host = store.getString(PreferenceConstants.P_HOST);
         basePath = store.getString(PreferenceConstants.P_BASEPATH);
-        protocol = store.getString(PreferenceConstants.P_PROTOCOL);
 
 	}
 
-	private String protocol;
 	private String host;
 	private String basePath;
-	private String projectKey;
-	private String RepositorySlug;
 	private String auth;
 
 	/**
@@ -58,11 +53,6 @@ public class Services {
 	 * @throws MalformedURLException 
 	 */
 	private void setUrl(Api apiName, UrlProtocol protocol, String host, String basePath, String projectKey, String repositorySlug, String filter) throws MalformedURLException {
-		this.protocol = protocol.toString();
-		this.host = host;
-		this.basePath = basePath;
-		this.projectKey = projectKey;
-		this.RepositorySlug = repositorySlug;
 		
 		switch (apiName) {
 			case GET_PULLREQUESTS_FOR_CURRENT_USER:

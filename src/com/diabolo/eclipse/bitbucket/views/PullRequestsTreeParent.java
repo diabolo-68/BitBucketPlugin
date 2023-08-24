@@ -3,11 +3,11 @@ package com.diabolo.eclipse.bitbucket.views;
 import java.util.ArrayList;
 
 class PullRequestsTreeParent extends PullRequestsTreeObject {
-	private ArrayList children;
+	private ArrayList<PullRequestsTreeObject> children;
 
 	public PullRequestsTreeParent(String name) {
 		super(name);
-		children = new ArrayList();
+		children = new ArrayList<PullRequestsTreeObject>();
 	}
 
 	public void addChild(PullRequestsTreeObject child) {

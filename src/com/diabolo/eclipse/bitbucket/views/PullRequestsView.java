@@ -4,11 +4,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.LogManager;
 
 import javax.inject.Inject;
 
-import org.apache.commons.logging.Log;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -57,7 +55,6 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 
-import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.Services;
 import com.diabolo.eclipse.bitbucket.valuePair;
 import com.diabolo.eclipse.bitbucket.api.Projects.Projects;
