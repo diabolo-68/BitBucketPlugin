@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 class PullRequestsTreeParent extends PullRequestsTreeObject {
 	private ArrayList<PullRequestsTreeObject> children;
-
+    
 	public PullRequestsTreeParent(String name) {
 		super(name);
 		children = new ArrayList<PullRequestsTreeObject>();

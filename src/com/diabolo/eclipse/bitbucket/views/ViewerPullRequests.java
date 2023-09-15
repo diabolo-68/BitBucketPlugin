@@ -13,6 +13,7 @@ public class ViewerPullRequests extends TreeViewer{
 		super(parent, style);
 		setExpandPreCheckFilters(true);
 		setAutoExpandLevel(10);
+		// Decorate the TreeView nodes
 		setLabelProvider(new ViewLabelProvider());
 	}
 
