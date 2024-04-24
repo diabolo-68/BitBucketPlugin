@@ -16,7 +16,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -25,7 +24,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -43,6 +41,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
@@ -63,6 +62,8 @@ import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestFor
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value;
 
 public class PullRequestsView extends ViewPart {
+	public PullRequestsView() {
+	}
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -89,6 +90,7 @@ public class PullRequestsView extends ViewPart {
 	private Button btnRefresh;
 	@Override
 	public void createPartControl(Composite parent) {
+		
 
 		parent.setLayout(new GridLayout(4, false));
 
@@ -127,7 +129,7 @@ public class PullRequestsView extends ViewPart {
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
 		btnRefresh = new Button(parent, SWT.NONE);
-		btnRefresh.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		btnRefresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		btnRefresh.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -162,12 +164,14 @@ public class PullRequestsView extends ViewPart {
 		cboFilterOn.select(0);
 		new Label(parent, SWT.NONE);
 
-		Composite scPullRequestsViewer = new Composite(parent,SWT.BORDER | SWT.EMBEDDED);
+		Composite scPullRequestsViewer = new Composite(parent,SWT.BORDER | SWT.NO_BACKGROUND | SWT.EMBEDDED);
+		scPullRequestsViewer.setBackground(Display.getCurrent().getSystemColor(SWT.BACKGROUND));
 
 		scPullRequestsViewer.setLayout(new FillLayout(SWT.HORIZONTAL));
 		scPullRequestsViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 		
-		viewerPullRequests = new ViewerPullRequests(scPullRequestsViewer,SWT.NONE);
+		viewerPullRequests = new ViewerPullRequests(scPullRequestsViewer,SWT.BORDER | SWT.CHECK);
+		viewerPullRequests.getControl().setBackground(Display.getCurrent().getSystemColor(SWT.BACKGROUND));
 		
 		drillDownAdapter = new DrillDownAdapter(viewerPullRequests);
 		
@@ -176,18 +180,21 @@ public class PullRequestsView extends ViewPart {
 		getSite().setSelectionProvider(viewerPullRequests);
 
 		tableViewer = new TableViewer(scPullRequestsViewer);
+		Table table = tableViewer.getTable();
+		
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		tableViewer.getTable().setLayoutData(gridData);
+		
+		table.setBackground(Display.getCurrent().getSystemColor(SWT.BACKGROUND));
+		table.setLinesVisible(true);
 
 		// Define the layout of the table*
 
 
-		TableLayout tlayout = new TableLayout();
-		tlayout.addColumnData(new ColumnWeightData(20, true));
-		tlayout.addColumnData(new ColumnWeightData(80, 400, false));
-
+		
 		tableViewer.setContentProvider(new ArrayContentProvider());
 
-		tableViewer.getTable().setLayout(tlayout);
-
+		
 		// For very element to display, we will select what to display
 		// in function of the column index
 		tableViewer.setLabelProvider(new ITableLabelProvider() {
@@ -558,21 +565,22 @@ public class PullRequestsView extends ViewPart {
 		    			   /*
 		    			    * Resize the columns in regards with the content
 		    			    */
-		    			   for (int i = 0, n = tableViewer.getTable().getColumnCount(); i < n; i++) {
-		    				   tableViewer.getTable().getColumn(i).pack();
-		    			   }
-		    			   
+		    			    
+		    			   tableViewer.getTable().getColumn(0).pack();
+		    			   tableViewer.getTable().getColumn(1).setWidth( tableViewer.getTable().getClientArea().width - tableViewer.getTable().getColumn(0).getWidth());
 		    			   
 		    			   for (int i = 0, n = tableViewer.getTable().getItemCount(); i < n; i++) {
-		    				   tableViewer.getTable().getItem(i).setBackground(0,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
-		    				   tableViewer.getTable().getItem(i).setBackground(1,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));	            		
 		    				   
-		    				   if ((i == 3 && !pullRequestState.contentEquals("CLEAN")) || i == 5) {
-		    					   tableViewer.getTable().getItem(i).setForeground(0,Display.getDefault().getSystemColor(SWT.COLOR_YELLOW));
-		    					   tableViewer.getTable().getItem(i).setForeground(1,Display.getDefault().getSystemColor(SWT.COLOR_YELLOW));	            		
+		    				   if ((i == 3 && !pullRequestState.contentEquals("CLEAN"))) {
+		    					   tableViewer.getTable().getItem(i).setForeground(0, Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		    					   tableViewer.getTable().getItem(i).setForeground(1, Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		    					   tableViewer.getTable().getItem(i).setBackground(0, Display.getDefault().getSystemColor(SWT.COLOR_RED));
+		    					   tableViewer.getTable().getItem(i).setBackground(1, Display.getDefault().getSystemColor(SWT.COLOR_RED));
+		    					   
 		    				   } else {
-		    					   tableViewer.getTable().getItem(i).setForeground(0,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-		    					   tableViewer.getTable().getItem(i).setForeground(1,Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));	            		
+		    				       // Set default foreground color for other items
+		    				       tableViewer.getTable().getItem(i).setForeground(0, Display.getDefault().getSystemColor(SWT.FOREGROUND));
+		    				       tableViewer.getTable().getItem(i).setForeground(1, Display.getDefault().getSystemColor(SWT.FOREGROUND));
 		    				   }
 		    			   }
 		    		   }
