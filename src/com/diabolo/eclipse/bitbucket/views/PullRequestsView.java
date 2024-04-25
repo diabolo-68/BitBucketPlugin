@@ -261,6 +261,8 @@ public class PullRequestsView extends ViewPart {
 					
 					initializeTreeView();
 					viewerPullRequests.setContentProvider(new ViewPullRequestsContentProvider(getViewSite(), invisibleRoot));
+					viewerPullRequests.setLabelProvider(new pullRequestsLabelProvider());
+
 					viewerPullRequests.expandAll();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -299,6 +301,7 @@ public class PullRequestsView extends ViewPart {
 			initializeTreeView();
 			
 			viewerPullRequests.setContentProvider(new ViewPullRequestsContentProvider(getViewSite(), invisibleRoot));
+			viewerPullRequests.setLabelProvider(new pullRequestsLabelProvider());
 			viewerPullRequests.setInput(getViewSite());
 
 

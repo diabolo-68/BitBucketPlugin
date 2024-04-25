@@ -88,6 +88,7 @@ public class Services {
 			connection.setRequestProperty ("Content-Type", "application/json");
 			return connection;
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
 			return null;
 		}
 	}
