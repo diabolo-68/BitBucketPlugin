@@ -29,10 +29,10 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
 /**
- * Utility class for managing OS resources associated with SWT controls such as colors, fonts, images, etc.
+ * Utility class for managing OS icons associated with SWT controls such as colors, fonts, images, etc.
  * <p>
  * !!! IMPORTANT !!! Application code must explicitly invoke the <code>dispose()</code> method to release the
- * operating system resources managed by cached objects when those objects and OS resources are no longer
+ * operating system icons managed by cached objects when those objects and OS icons are no longer
  * needed (e.g. on application shutdown)
  * <p>
  * This class may be freely distributed as part of any application or plugin.
@@ -435,7 +435,7 @@ public class SWTResourceManager {
 	//
 	////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Dispose of cached objects and their underlying OS resources. This should only be called when the cached
+	 * Dispose of cached objects and their underlying OS icons. This should only be called when the cached
 	 * objects are no longer needed (e.g. on application shutdown).
 	 */
 	public static void dispose() {

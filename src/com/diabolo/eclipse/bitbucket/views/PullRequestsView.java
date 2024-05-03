@@ -1,9 +1,8 @@
 package com.diabolo.eclipse.bitbucket.views;
 
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
@@ -14,16 +13,13 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -41,27 +37,39 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 
+import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.Services;
-import com.diabolo.eclipse.bitbucket.valuePair;
+import com.diabolo.eclipse.bitbucket.ValuePair;
 import com.diabolo.eclipse.bitbucket.api.Projects.Projects;
 import com.diabolo.eclipse.bitbucket.api.Repositories.Repositories;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value;
+import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.Viewer;
 
+/*
+ * A JFace view that displays all Pull-Requests extracted from BitBucket
+ * using the BitBucket APIs.
+ * When a pull-request is selected in the tree-view, some data are displayed
+ * in a table.
+ */
 public class PullRequestsView extends ViewPart {
+	private static class Sorter extends ViewerSorter {
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			Object item1 = e1;
+			Object item2 = e2;
+			return 0;
+		}
+	}
+	
 	public PullRequestsView() {
 	}
 
@@ -88,6 +96,7 @@ public class PullRequestsView extends ViewPart {
 	private TableViewer tableViewer;
 	private PullRequestsTreeParent invisibleRoot = new PullRequestsTreeParent("Pull Request is empty");
 	private Button btnRefresh;
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		
@@ -98,13 +107,13 @@ public class PullRequestsView extends ViewPart {
 		cboProjects.add("All");
 		cboProjects.setText("Project");
 		cboProjects.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+
 		cboProjects.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				invisibleRoot = null;
 				initializeTreeView();
 				
-				// When the user select another project, the repository combo is automatically set to "All*
+				// When the user select another project, the repository combo is automatically set to "All"
 				cboRepositories.select(0);
 				
 				// First combo's entry is always "All"
@@ -120,7 +129,6 @@ public class PullRequestsView extends ViewPart {
 			}
 		});
 	
-	
 		Label lblFilter = new Label(parent, SWT.NONE);
 		lblFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		lblFilter.setText("Filter:");
@@ -130,6 +138,7 @@ public class PullRequestsView extends ViewPart {
 
 		btnRefresh = new Button(parent, SWT.NONE);
 		btnRefresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		
 		btnRefresh.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -147,12 +156,12 @@ public class PullRequestsView extends ViewPart {
 		cboRepositories.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
 				btnRefresh.notifyListeners(SWT.Selection, new Event());				
 			}
 		});
 		
 		Label lblFilterOn = new Label(parent, SWT.NONE);
+		
 		lblFilterOn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		lblFilterOn.setText("Filter on:");
 
@@ -162,108 +171,62 @@ public class PullRequestsView extends ViewPart {
 		cboFilterOn.setItems(new String[] { "Pull Request Title", "Source Branch", "Target Branch" });
 		cboFilterOn.setToolTipText("Select on which element the filter must apply to");
 		cboFilterOn.select(0);
+		
 		new Label(parent, SWT.NONE);
 
-		Composite scPullRequestsViewer = new Composite(parent,SWT.BORDER | SWT.NO_BACKGROUND | SWT.EMBEDDED);
+		Composite scPullRequestsViewer = new Composite(parent,SWT.BORDER | SWT.EMBEDDED);
 		scPullRequestsViewer.setBackground(Display.getCurrent().getSystemColor(SWT.BACKGROUND));
 
 		scPullRequestsViewer.setLayout(new FillLayout(SWT.HORIZONTAL));
 		scPullRequestsViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 		
-		viewerPullRequests = new ViewerPullRequests(scPullRequestsViewer,SWT.BORDER | SWT.CHECK);
-		viewerPullRequests.getControl().setBackground(Display.getCurrent().getSystemColor(SWT.BACKGROUND));
+		viewerPullRequests = new ViewerPullRequests(scPullRequestsViewer,SWT.BORDER);
 		
+		/*
+		 * Create the JFace TreeView object itself
+		 */
 		drillDownAdapter = new DrillDownAdapter(viewerPullRequests);
 		
 		// Create the help context id for the viewer's control
 		workbench.getHelpSystem().setHelp(viewerPullRequests.getControl(), "com.diabolo.eclipse.bitbucket.viewer");
 		getSite().setSelectionProvider(viewerPullRequests);
 
-		tableViewer = new TableViewer(scPullRequestsViewer);
-		Table table = tableViewer.getTable();
+		/*
+		 * Create the 2 columns table view to display
+		 * selected pull-request's data
+		 */
+		tableViewer = new TableViewer(scPullRequestsViewer, SWT.FULL_SELECTION);
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
+
+		createTableViewerColumns();
 		
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		tableViewer.getTable().setLayoutData(gridData);
+		TableViewerLabelProvider labelProvider = new TableViewerLabelProvider();
+		labelProvider.setViewer(tableViewer);
 		
-		table.setBackground(Display.getCurrent().getSystemColor(SWT.BACKGROUND));
-		table.setLinesVisible(true);
+		tableViewer.setLabelProvider(labelProvider);
 
-		// Define the layout of the table*
+		GridData data = new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.GRAB_VERTICAL | GridData.FILL_BOTH);
 
-
+		tableViewer.getControl().setLayoutData(data);
 		
-		tableViewer.setContentProvider(new ArrayContentProvider());
-
-		
-		// For very element to display, we will select what to display
-		// in function of the column index
-		tableViewer.setLabelProvider(new ITableLabelProvider() {
-
-			@Override
-			public void removeListener(ILabelProviderListener arg0) {
-				// nothing
-			}
-
-			@Override
-			public boolean isLabelProperty(Object arg0, String arg1) {
-				return false;
-			}
-
-			@Override
-			public void dispose() {
-				// nothing
-			}
-
-			@Override
-			public void addListener(ILabelProviderListener arg0) {
-				// nothing
-			}
-
-			@Override
-			public String getColumnText(Object element, int colmnIndex) {
-
-				String result = null;
-				switch (colmnIndex) {
-				case 0:
-					result = ((valuePair) element).getKey();
-					break;
-
-				case 1:
-					result = ((valuePair) element).getValue();
-					break;
-				}
-				return result;
-			}
-
-			@Override
-			public Image getColumnImage(Object element, int colmnIndex) {
-				return null;
-			}
-		});
-
-		String[] COLUMNS = new String[] { "Element", "Value" };
-
-		for (String element : COLUMNS) {
-			TableColumn col = new TableColumn(tableViewer.getTable(), SWT.FILL);
-			col.setText(element);
-		}
-
 		btnRefresh.addListener(SWT.Selection, new Listener() {
 
 			@Override
 			public void handleEvent(Event arg0) {
 				try {
 					
-					invisibleRoot = null;
 					if (cboProjects.getItemCount() <= 1) {
 						initializeData();
 					}
 					
 					initializeTreeView();
 					viewerPullRequests.setContentProvider(new ViewPullRequestsContentProvider(getViewSite(), invisibleRoot));
-					viewerPullRequests.setLabelProvider(new pullRequestsLabelProvider());
+					
+					viewerPullRequests.setLabelProvider(new TreeViewerLabelProvider());
 
 					viewerPullRequests.expandAll();
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -277,6 +240,29 @@ public class PullRequestsView extends ViewPart {
 		contributeToActionBars();
 	}
 
+	
+	/**
+	 * Create the columns to be used.
+	 */	
+	private void createTableViewerColumns() {
+		TableLayout layout = new TableLayout();
+		tableViewer.getTable().setLayout(layout);
+		tableViewer.getTable().setHeaderVisible(true);
+		tableViewer.getTable().setLinesVisible(true);
+
+		
+		String[] columns = new String[] { "Element", "Value" };
+		for (String element : columns) {
+			TableColumn col = new TableColumn(tableViewer.getTable(), SWT.NONE, 0);
+			col.setText(element);
+		}
+	}
+	
+	
+	/*
+	 * Initialize view's default values by
+	 * using the BitBucket APIs
+	 */
 	private void initializeData() {
 		Projects projects = services.GetProjects();
 		
@@ -286,8 +272,6 @@ public class PullRequestsView extends ViewPart {
 			repositoriesValues = repositories.getValues();
 
 			projectsValues = projects.getValues();					
-
-			// TODO: Check if PR can be merged, highlight the PR if conflict
 
 			projectsValues.forEach(projectValue -> {
 				cboProjects.add(projectValue.getName());
@@ -301,7 +285,7 @@ public class PullRequestsView extends ViewPart {
 			initializeTreeView();
 			
 			viewerPullRequests.setContentProvider(new ViewPullRequestsContentProvider(getViewSite(), invisibleRoot));
-			viewerPullRequests.setLabelProvider(new pullRequestsLabelProvider());
+			viewerPullRequests.setLabelProvider(new TreeViewerLabelProvider());
 			viewerPullRequests.setInput(getViewSite());
 
 
@@ -311,11 +295,8 @@ public class PullRequestsView extends ViewPart {
 		
 	}
 
-	/*
-	 * We will set up a dummy model to initialize tree hierarchy. In a real code,
-	 * you will connect to a real model and expose its hierarchy.
-	 */
 	private void initializeTreeView() {
+		
 		invisibleRoot = null;
 		
 		PullRequestsTreeParent root = new PullRequestsTreeParent("");
@@ -337,22 +318,39 @@ public class PullRequestsView extends ViewPart {
 
 		final com.diabolo.eclipse.bitbucket.api.Projects.Value currentProjectValue = projectValue;
 		final com.diabolo.eclipse.bitbucket.api.Repositories.Value currentRepositoryValue = repositoryValue;
-		
+
+		/*
+		 * Parse all repositories, 
+		 * parse all projects of repositories,
+		 * get all open pull-requests of projects
+		 * 
+		 */
 		if (repositoriesValues.size() > 0) {
+			
 			repositoriesValues.forEach(repository -> {
+			
 				PullRequestForRepository pullRequests;
 				
 				List<com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value> pullRequestValues;
 
 				if (cboProjects.getItemCount() > 0 && cboRepositories.getItemCount() > 0) {
+
 					String repositoryTreeValue = repository.getName();
 					
+					/*
+					 * Filter the repositories with the repository-combo's value
+					 */
 					if (idxRepositories == 0 || currentRepositoryValue.getId() == repository.getId()) {
 						
+						/*
+						 * Filter the projects with the project-combo's value
+						 */
 						if (idxProject == 0	|| repository.getProject().getId().compareTo(currentProjectValue.getId()) == 0) {
+							
 							pullRequests = services.GetPullRequestsForRepo(repository.getProject().getKey(), repository.getName());
 							
 							if (pullRequests != null) {
+								
 								pullRequestValues = pullRequests.getValues();
 	
 								if (pullRequestValues.size() > 0) {
@@ -361,9 +359,15 @@ public class PullRequestsView extends ViewPart {
 
 									pullRequestValues.forEach(prValue -> {
 
+										/*
+										 * For each pull-request, fill the tree-view
+										 */
 										String treeName = String.format("%s - %s", prValue.getTitle(),
 												prValue.getAuthor().getUser().getDisplayName());
 									
+										/*
+										 * Apply the filters
+										 */
 										if (!txtFilter.getText().isBlank()) {
 
 											switch (cboFilterOn.getSelectionIndex()) {
@@ -412,6 +416,11 @@ public class PullRequestsView extends ViewPart {
 	}
 
 	
+	/*
+	 * Get all repositories from BitBucket using the APIs
+	 * and fill the cboRepositories.
+	 * The first entry is always 'All'
+	 */
 	private void fillCboRepositories() {
 
 		cboRepositories.removeAll();
@@ -440,10 +449,12 @@ public class PullRequestsView extends ViewPart {
 
 		cboRepositories.update();
 		cboRepositories.select(0);
-
 	}
 
 	
+	/*
+	 * Define a context-menu on the tree-view
+	 */
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 
@@ -460,6 +471,9 @@ public class PullRequestsView extends ViewPart {
 		getSite().registerContextMenu(menuMgr, viewerPullRequests);
 	}
 
+	/*
+	 * Add a toolbar in the view
+	 */
 	private void contributeToActionBars() {
 		IActionBars bars = getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
@@ -488,6 +502,9 @@ public class PullRequestsView extends ViewPart {
 		drillDownAdapter.addNavigationActions(manager);
 	}
 
+	/*
+	 * Define all possible actions of the current view
+	 */
 	private void makeActions() {
 		collapseAllAction = new Action() {
 			public void run() {
@@ -495,10 +512,11 @@ public class PullRequestsView extends ViewPart {
 			}
 		};
 
+		URL imageUrl;
 		collapseAllAction.setText("Collapse All");
 		collapseAllAction.setToolTipText("Collapse Pull Requests List");
-		collapseAllAction.setImageDescriptor(
-				PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL));
+
+		collapseAllAction.setImageDescriptor(Activator.getImageDescriptor(Activator.ICON_COLLAPSEALL));
 
 		expandAllAction = new Action() {
 			public void run() {
@@ -508,131 +526,91 @@ public class PullRequestsView extends ViewPart {
 		
 		expandAllAction.setText("Expand All");
 		expandAllAction.setToolTipText("Expand Pull Requests List");
-		URL imageUrl;
 		
-		try {
-			imageUrl = new URL("platform:/plugin/org.eclipse.xtext.ui/icons/elcl16/expandall.gif");
-			expandAllAction.setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+		expandAllAction.setImageDescriptor(Activator.getImageDescriptor(Activator.ICON_EXPANDALL));
 	
+		/*
+		 * Define an action on the tree-view.
+		 * When a pull-request in the tree-view is selected,
+		 * the corresponding data are displayed in the pull-request table.
+		 */
+		
 		PullRequestClickAction = new Action() {
+			private int reviewerNumber;
+			private String image;
 			public void run() {
-				
+			
+				ArrayList<ValuePair> tableLines = new ArrayList<>();
+   				tableViewer.setInput(null);
+   				tableViewer.getTable().clearAll();
+   				tableViewer.update(tableViewer.getTable().getItems(), null);
+   				
 				IStructuredSelection selection = viewerPullRequests.getStructuredSelection();
-				PullRequestsTreeObject obj = (PullRequestsTreeObject) selection.getFirstElement();
-
-				valuePair[] currentLine = new valuePair[20];
-
-				AtomicInteger reviewerCounter = new AtomicInteger();
 				
-				reviewerCounter.set(5);
-
-				/*
-				 * Delete the current table content	
-				 */
-
-				for (int i = 0; i < 20; i++) {
-					currentLine[i] = new valuePair("","");
-				}
-
-				tableViewer.setInput(currentLine);
-			    	
+				PullRequestsTreeObject obj = (PullRequestsTreeObject) selection.getFirstElement();
+				
 				if (obj != null) {
-		    		   if (obj.getData() instanceof Value) {
-		    			   Value prValue = ((Value) obj.getData());
-		    			   
-		    			   String pullRequestState = prValue.getProperties().getMergeResult().getOutcome();
-		    			   currentLine[0] = new valuePair("Author", prValue.getAuthor().getUser().getDisplayName());
-		    			   currentLine[1] = new valuePair("Title", prValue.getTitle());
-		    			   currentLine[2] = new valuePair("Branch", prValue.getFromRef().getId());
-		    			   currentLine[3] = new valuePair("State", pullRequestState);
-		    			   currentLine[4] = new valuePair("Description", prValue.getDescription());
+					if (obj.getData() instanceof Value) {
+	    				Value prValue = ((Value) obj.getData());
 
-		    			   prValue.getReviewers().forEach(reviewer -> {
-		    				   
-		    				   if (reviewerCounter.get() < 20) {
-		    					   String reviewerStatus = reviewer.getStatus().toString();
-		    					   
-		    					   if (!reviewerStatus.equalsIgnoreCase("UNAPPROVED")) {
-		    						   currentLine[reviewerCounter.get()] = new valuePair(reviewer.getUser().getDisplayName(), reviewerStatus);
-		    						   reviewerCounter.getAndIncrement();
-		    					   }
-		    				   }
-		    				   
-		    			   });
-		    			   
-		    			   tableViewer.setInput(currentLine);
-		    			   
-		    			   /*
-		    			    * Resize the columns in regards with the content
-		    			    */
-		    			    
-		    			   tableViewer.getTable().getColumn(0).pack();
-		    			   tableViewer.getTable().getColumn(1).setWidth( tableViewer.getTable().getClientArea().width - tableViewer.getTable().getColumn(0).getWidth());
-		    			   
-		    			   for (int i = 0, n = tableViewer.getTable().getItemCount(); i < n; i++) {
-		    				   
-		    				   if ((i == 3 && !pullRequestState.contentEquals("CLEAN"))) {
-		    					   tableViewer.getTable().getItem(i).setForeground(0, Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		    					   tableViewer.getTable().getItem(i).setForeground(1, Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		    					   tableViewer.getTable().getItem(i).setBackground(0, Display.getDefault().getSystemColor(SWT.COLOR_RED));
-		    					   tableViewer.getTable().getItem(i).setBackground(1, Display.getDefault().getSystemColor(SWT.COLOR_RED));
-		    					   
-		    				   } else {
-		    				       // Set default foreground color for other items
-		    				       tableViewer.getTable().getItem(i).setForeground(0, Display.getDefault().getSystemColor(SWT.FOREGROUND));
-		    				       tableViewer.getTable().getItem(i).setForeground(1, Display.getDefault().getSystemColor(SWT.FOREGROUND));
-		    				   }
-		    			   }
-		    		   }
+		   				tableLines.add(new ValuePair(Activator.ICON_AUTHOR, "Author", prValue.getAuthor().getUser().getDisplayName(), tableLines.size() + 1));
+		   				tableLines.add(new ValuePair(Activator.ICON_SOURCE,"Title", prValue.getTitle(), tableLines.size() + 1));
+		   				tableLines.add(new ValuePair(Activator.ICON_BRANCHES,"Branch", prValue.getFromRef().getId(), tableLines.size() + 1));
+		   				
+		   				String state = prValue.getProperties().getMergeResult().getOutcome();
+		   				if (state.equalsIgnoreCase("clean")) {
+		   					tableLines.add(new ValuePair(Activator.ICON_SYMBOLS,"State", state, tableLines.size() + 1));		   					
+		   				} else {
+		   					tableLines.add(new ValuePair(Activator.ICON_WARNINGS,"State", state, tableLines.size() + 1));		   							   					
+		   				}
+		   				tableLines.add(new ValuePair(Activator.ICON_COMMENT,"Description", "\nTEST\n" + prValue.getDescription() + "\n" + "TEST", tableLines.size() + 1));
+
+		   				/*
+		   				 * Get the pull-request's reviewers
+		   				 * We don't increment the line to force the table to display
+		   				 * all the data with the same background color
+		   				 */
+		   				
+		   				reviewerNumber = 1;
+		   				 
+		   				prValue.getReviewers().forEach(reviewer -> {
+		   					
+		   					if (reviewer.getStatus().equalsIgnoreCase("unapproved")) {
+		   						image = Activator.ICON_PERSON_WITH_CROSS;
+		   					} else {
+		   						image = Activator.ICON_PERSON_WITH_TICK;
+		   					}
+		   					tableLines.add(new ValuePair(image, "Reviewer #" + reviewerNumber, reviewer.getUser().getDisplayName() + " (" + reviewer.getStatus().toLowerCase() + ")", tableLines.size() + 1)); 
+		   					reviewerNumber++;
+		   				});
+		   				
+		   				tableViewer.setInput(tableLines);
+		   				/*
+		   				 * Resize the columns in regards with the content
+		   				 */				
+		   				
+		   				
+		   				tableViewer.getTable().getColumn(0).pack();
+		   				tableViewer.getTable().getColumn(1).setWidth( tableViewer.getTable().getClientArea().width - tableViewer.getTable().getColumn(0).getWidth());				
+					
+					}
+					tableViewer.refresh();
+					tableViewer.getTable().redraw();
 				}
-	            
-	            tableViewer.refresh();
-			}
+			} 
 		};
 	}
 
+	/*
+	 * Link the Actions to the tree-view
+	 */
 	private void hookPullRequestAction() {
 		if (viewerPullRequests != null) {
-			viewerPullRequests.addDoubleClickListener(new IDoubleClickListener() {
-				public void doubleClick(DoubleClickEvent event) {
-				       if(event.getSelection() instanceof IStructuredSelection) {
-				    	   IStructuredSelection selection = viewerPullRequests.getStructuredSelection();						
-				    	   PullRequestsTreeObject obj = (PullRequestsTreeObject) selection.getFirstElement();
-				    	   System.out.println("-1");
-				    	   if (obj != null) {
-				    		   System.out.println("0");
-				    		   if (obj.getData() instanceof Value) {
-				    			   try {
-				    				   System.out.println("1");
-				    				   IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
-				    				   
-				    				   ((Value) obj.getData()).getLinks().getSelf().forEach(currentSelf -> {
-				    					   URL url;
-											try {
-												url = new URL(currentSelf.getHref().toString());
-												browser.openURL(url);
-											} catch (MalformedURLException | PartInitException e) {
-												e.printStackTrace();
-											}
-				    				   });
-				    				   
-				    			   } catch (Exception e) {
-				    				   System.out.println(e);
-				    			   }
-				    		   }
-				    	   }
-				       }
-				       }
-			});			
-
+			viewerPullRequests.addDoubleClickListener(new ViewerPullRequestsDoubleClickListener());
 			
 			viewerPullRequests.addSelectionChangedListener(new ISelectionChangedListener() {
 			   public void selectionChanged(SelectionChangedEvent event) {
 			       if(event.getSelection() instanceof IStructuredSelection) {
-			    	   IStructuredSelection selection = viewerPullRequests.getStructuredSelection();						
 			    	   PullRequestClickAction.run();
 			       }
 			   }
@@ -641,11 +619,6 @@ public class PullRequestsView extends ViewPart {
 	}
 
 	private void showMessage(String message) {
-		/*
-		 * MyTitleAreaDialog dialog = new
-		 * MyTitleAreaDialog(viewerPullRequests.getControl().getShell());
-		 * dialog.create(); dialog.open();
-		 */
 		MessageDialog.openInformation(viewerPullRequests.getControl().getShell(), "Pull Requests", message);
 	}
 
@@ -655,5 +628,4 @@ public class PullRequestsView extends ViewPart {
 			viewerPullRequests.getControl().setFocus();
 		}
 	}
-
 }

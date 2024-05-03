@@ -3,6 +3,7 @@ package com.diabolo.eclipse.bitbucket.views;
 import org.eclipse.core.runtime.IAdaptable;
 
 class PullRequestsTreeObject implements IAdaptable {
+	
 	private String name;
 	private PullRequestsTreeParent parent;
 	private Object data;

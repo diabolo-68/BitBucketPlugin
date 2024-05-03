@@ -8,7 +8,8 @@ Bundle-ClassPath: .
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  com.google.gson;bundle-version="2.10.1",
- javax.annotation;bundle-version="1.3.5"
+ javax.annotation;bundle-version="1.3.5",
+ org.eclipse.core.resources
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: com.diabolo.eclipse.bitbucket
 Import-Package: javax.inject;version="[1.0.0,2.0.0)"
@@ -18,5 +19,8 @@ Export-Package: com.diabolo.eclipse.bitbucket,
  com.diabolo.eclipse.bitbucket.api.PullRequestsForCurrentUser,
  com.diabolo.eclipse.bitbucket.api.Repositories,
  com.diabolo.eclipse.bitbucket.api.pullrequestforrepository,
+ com.diabolo.eclipse.bitbucket.handlers,
  com.diabolo.eclipse.bitbucket.preferences,
- com.diabolo.eclipse.bitbucket.views
+ com.diabolo.eclipse.bitbucket.views,
+ icons,
+ org.eclipse.wb.swt

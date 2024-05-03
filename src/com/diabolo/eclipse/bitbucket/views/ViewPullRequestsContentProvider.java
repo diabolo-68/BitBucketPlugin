@@ -3,7 +3,7 @@ package com.diabolo.eclipse.bitbucket.views;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.ui.IViewSite;
 
-class ViewPullRequestsContentProvider implements ITreeContentProvider {
+public class ViewPullRequestsContentProvider implements ITreeContentProvider {
 
 	private IViewSite iViewSite;
 	private PullRequestsTreeParent invisibleRoot;

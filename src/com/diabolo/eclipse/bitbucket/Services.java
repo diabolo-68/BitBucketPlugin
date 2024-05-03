@@ -110,7 +110,7 @@ public class Services {
 
 	}
 	
-	public PullRequestsForCurrentUser GetPullRequests(pullRequestState state) {
+	public PullRequestsForCurrentUser GetPullRequests(PullRequestState state) {
 				
 		try {
 			setUrl(Api.GET_PULLREQUESTS_FOR_CURRENT_USER, UrlProtocol.https , host, basePath, "", "", state.toString());

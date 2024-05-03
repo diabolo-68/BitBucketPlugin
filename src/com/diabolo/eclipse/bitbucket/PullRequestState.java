@@ -1,5 +1,5 @@
 package com.diabolo.eclipse.bitbucket;
 
-public enum pullRequestState {
+public enum PullRequestState {
 OPEN, MERGED, DECLINED, ALL
 }

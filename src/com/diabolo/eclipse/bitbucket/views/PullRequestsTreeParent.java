@@ -2,7 +2,7 @@ package com.diabolo.eclipse.bitbucket.views;
 
 import java.util.ArrayList;
 
-class PullRequestsTreeParent extends PullRequestsTreeObject {
+public class PullRequestsTreeParent extends PullRequestsTreeObject {
 	private ArrayList<PullRequestsTreeObject> children;
 
 	public PullRequestsTreeParent(String name) {
