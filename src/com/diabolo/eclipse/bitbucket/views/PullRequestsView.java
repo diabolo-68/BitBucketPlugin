@@ -1,6 +1,5 @@
 package com.diabolo.eclipse.bitbucket.views;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -25,7 +23,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -39,6 +36,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -52,8 +50,7 @@ import com.diabolo.eclipse.bitbucket.api.Projects.Projects;
 import com.diabolo.eclipse.bitbucket.api.Repositories.Repositories;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value;
-import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Table;
 
 /*
  * A JFace view that displays all Pull-Requests extracted from BitBucket
@@ -62,13 +59,6 @@ import org.eclipse.jface.viewers.Viewer;
  * in a table.
  */
 public class PullRequestsView extends ViewPart {
-	private static class Sorter extends ViewerSorter {
-		public int compare(Viewer viewer, Object e1, Object e2) {
-			Object item1 = e1;
-			Object item2 = e2;
-			return 0;
-		}
-	}
 	
 	public PullRequestsView() {
 	}
@@ -96,17 +86,17 @@ public class PullRequestsView extends ViewPart {
 	private TableViewer tableViewer;
 	private PullRequestsTreeParent invisibleRoot = new PullRequestsTreeParent("Pull Request is empty");
 	private Button btnRefresh;
+	private Composite composite;
+	private Text descriptionText;
 	
 	@Override
 	public void createPartControl(Composite parent) {
-		
-
 		parent.setLayout(new GridLayout(4, false));
 
 		cboProjects = new Combo(parent, SWT.NONE);
+		cboProjects.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		cboProjects.add("All");
 		cboProjects.setText("Project");
-		cboProjects.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
 		cboProjects.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -161,7 +151,6 @@ public class PullRequestsView extends ViewPart {
 		});
 		
 		Label lblFilterOn = new Label(parent, SWT.NONE);
-		
 		lblFilterOn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		lblFilterOn.setText("Filter on:");
 
@@ -171,44 +160,56 @@ public class PullRequestsView extends ViewPart {
 		cboFilterOn.setItems(new String[] { "Pull Request Title", "Source Branch", "Target Branch" });
 		cboFilterOn.setToolTipText("Select on which element the filter must apply to");
 		cboFilterOn.select(0);
-		
 		new Label(parent, SWT.NONE);
 
 		Composite scPullRequestsViewer = new Composite(parent,SWT.BORDER | SWT.EMBEDDED);
+		scPullRequestsViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 		scPullRequestsViewer.setBackground(Display.getCurrent().getSystemColor(SWT.BACKGROUND));
 
 		scPullRequestsViewer.setLayout(new FillLayout(SWT.HORIZONTAL));
-		scPullRequestsViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
-		
-		viewerPullRequests = new ViewerPullRequests(scPullRequestsViewer,SWT.BORDER);
 		
 		/*
 		 * Create the JFace TreeView object itself
 		 */
-		drillDownAdapter = new DrillDownAdapter(viewerPullRequests);
-		
-		// Create the help context id for the viewer's control
-		workbench.getHelpSystem().setHelp(viewerPullRequests.getControl(), "com.diabolo.eclipse.bitbucket.viewer");
-		getSite().setSelectionProvider(viewerPullRequests);
 
 		/*
 		 * Create the 2 columns table view to display
 		 * selected pull-request's data
 		 */
-		tableViewer = new TableViewer(scPullRequestsViewer, SWT.FULL_SELECTION);
-		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
-
-		createTableViewerColumns();
 		
+		viewerPullRequests = new ViewerPullRequests(scPullRequestsViewer,SWT.BORDER);
+		Tree tree = viewerPullRequests.getTree();
+		tree.setLinesVisible(true);
+		drillDownAdapter = new DrillDownAdapter(viewerPullRequests);
+		
+		// Create the help context id for the viewer's control
+		workbench.getHelpSystem().setHelp(viewerPullRequests.getControl(), "com.diabolo.eclipse.bitbucket.viewer");
+		getSite().setSelectionProvider(viewerPullRequests);
+		
+		composite = new Composite(scPullRequestsViewer, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
+		tableViewer = new TableViewer(composite, SWT.FULL_SELECTION);
+		Table table = tableViewer.getTable();
+		table.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		
+		descriptionText = new Text(composite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
+		GridData gd_descriptionText = new GridData(SWT.FILL , SWT.FILL, true, true, 1, 1);
+		gd_descriptionText.widthHint = 279;
+		descriptionText.setLayoutData(gd_descriptionText);
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		TableViewerLabelProvider labelProvider = new TableViewerLabelProvider();
 		labelProvider.setViewer(tableViewer);
 		
 		tableViewer.setLabelProvider(labelProvider);
-
+		
 		GridData data = new GridData(GridData.GRAB_HORIZONTAL
 				| GridData.GRAB_VERTICAL | GridData.FILL_BOTH);
 
 		tableViewer.getControl().setLayoutData(data);
+
+		createTableViewerColumns();
+		
+
 		
 		btnRefresh.addListener(SWT.Selection, new Listener() {
 
@@ -512,7 +513,6 @@ public class PullRequestsView extends ViewPart {
 			}
 		};
 
-		URL imageUrl;
 		collapseAllAction.setText("Collapse All");
 		collapseAllAction.setToolTipText("Collapse Pull Requests List");
 
@@ -550,6 +550,9 @@ public class PullRequestsView extends ViewPart {
 				PullRequestsTreeObject obj = (PullRequestsTreeObject) selection.getFirstElement();
 				
 				if (obj != null) {
+					
+					descriptionText.setText("");
+					
 					if (obj.getData() instanceof Value) {
 	    				Value prValue = ((Value) obj.getData());
 
@@ -563,8 +566,12 @@ public class PullRequestsView extends ViewPart {
 		   				} else {
 		   					tableLines.add(new ValuePair(Activator.ICON_WARNINGS,"State", state, tableLines.size() + 1));		   							   					
 		   				}
-		   				tableLines.add(new ValuePair(Activator.ICON_COMMENT,"Description", "\nTEST\n" + prValue.getDescription() + "\n" + "TEST", tableLines.size() + 1));
-
+		   				//tableLines.add(new ValuePair(Activator.ICON_COMMENT,"Description", "\nTEST\n" + prValue.getDescription() + "\n" + "TEST", tableLines.size() + 1));
+	   					
+		   				if (prValue.getDescription() != null) {
+		   					descriptionText.setText(prValue.getDescription());
+		   				}
+		   				
 		   				/*
 		   				 * Get the pull-request's reviewers
 		   				 * We don't increment the line to force the table to display
