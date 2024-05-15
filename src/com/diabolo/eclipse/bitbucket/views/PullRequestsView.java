@@ -613,7 +613,6 @@ public class PullRequestsView extends ViewPart {
 	 */
 	private void hookPullRequestAction() {
 		if (viewerPullRequests != null) {
-			viewerPullRequests.addDoubleClickListener(new ViewerPullRequestsDoubleClickListener());
 			
 			viewerPullRequests.addSelectionChangedListener(new ISelectionChangedListener() {
 			   public void selectionChanged(SelectionChangedEvent event) {
