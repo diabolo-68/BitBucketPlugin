@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Base64;
+import java.util.List;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -15,13 +16,29 @@ import com.diabolo.eclipse.bitbucket.api.PullRequestsForCurrentUser.PullRequests
 import com.diabolo.eclipse.bitbucket.api.Repositories.Repositories;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
+import com.diabolo.eclipse.bitbucket.views.ViewerPullRequests;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class Services {
+public class BitBucketServices {
 
 	private URL url;
-	public Services() {
+	public Projects projects;
+	public Repositories repositories;
+	
+	public List<com.diabolo.eclipse.bitbucket.api.Projects.Value> projectsValues;
+	public List<com.diabolo.eclipse.bitbucket.api.Repositories.Value> repositoriesValues;
+	
+	public void Update() {
+		projects = GetProjects();
+		repositories = GetRepositories();
+		if (projects != null && repositories != null) {
+			repositoriesValues = repositories.getValues();
+			projectsValues = projects.getValues();					
+		}
+	}
+	
+	public BitBucketServices() {
 		super();
         ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE,
                 "com.diabolo.eclipse.bitbucket");
@@ -40,19 +57,19 @@ public class Services {
 	 * @param url the url to set
 	 * @throws MalformedURLException 
 	 */
-	private void setUrl(Api apiName, UrlProtocol protocol, String host, String basePath) throws MalformedURLException {
+	private void SetUrl(Api apiName, UrlProtocol protocol, String host, String basePath) throws MalformedURLException {
 		setUrl (apiName, protocol, host, basePath, "", "");
 	}
 		
 	private void setUrl(Api apiName, UrlProtocol protocol, String host, String basePath, String projectKey, String RepositorySlug) throws MalformedURLException {
-		setUrl (apiName, protocol, host, basePath, projectKey, RepositorySlug, "");
+		SetUrl (apiName, protocol, host, basePath, projectKey, RepositorySlug, "");
 	}
 
 	/**
 	 * @param url the url to set
 	 * @throws MalformedURLException 
 	 */
-	private void setUrl(Api apiName, UrlProtocol protocol, String host, String basePath, String projectKey, String repositorySlug, String filter) throws MalformedURLException {
+	private void SetUrl(Api apiName, UrlProtocol protocol, String host, String basePath, String projectKey, String repositorySlug, String filter) throws MalformedURLException {
 		
 		switch (apiName) {
 			case GET_PULLREQUESTS_FOR_CURRENT_USER:
@@ -113,7 +130,7 @@ public class Services {
 	public PullRequestsForCurrentUser GetPullRequests(PullRequestState state) {
 				
 		try {
-			setUrl(Api.GET_PULLREQUESTS_FOR_CURRENT_USER, UrlProtocol.https , host, basePath, "", "", state.toString());
+			SetUrl(Api.GET_PULLREQUESTS_FOR_CURRENT_USER, UrlProtocol.https , host, basePath, "", "", state.toString());
 			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
 			
 			if (connection.getResponseCode() == 200) {
@@ -159,7 +176,7 @@ public class Services {
 	public Projects GetProjects() {
 		
 		try {
-			setUrl(Api.GET_PROJECTS, UrlProtocol.https , host, basePath);
+			SetUrl(Api.GET_PROJECTS, UrlProtocol.https , host, basePath);
 			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
 			
 			if (connection.getResponseCode() == 200) {
@@ -182,7 +199,7 @@ public class Services {
 	public Repositories GetRepositories() {
 		
 		try {
-			setUrl(Api.GET_REPOSITORIES, UrlProtocol.https , host, basePath);
+			SetUrl(Api.GET_REPOSITORIES, UrlProtocol.https , host, basePath);
 			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
 			
 			if (connection.getResponseCode() == 200) {

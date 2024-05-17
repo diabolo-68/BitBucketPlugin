@@ -3,11 +3,14 @@ package com.diabolo.eclipse.bitbucket;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import com.diabolo.eclipse.bitbucket.views.ViewerPullRequests;
 
 public class Activator extends AbstractUIPlugin {
 
@@ -107,4 +110,10 @@ public class Activator extends AbstractUIPlugin {
         Image image = imageRegistry.get(key);
         return image;
     }    
+    
+    // replace viewerPullRequests
+	public static void showMessage(ViewerPullRequests viewerPullRequests, String message ) {
+		MessageDialog.openInformation(viewerPullRequests.getControl().getShell(), "Pull Requests", message);
+	}
+    
  }

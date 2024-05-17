@@ -1,8 +1,6 @@
 package com.diabolo.eclipse.bitbucket.views;
 
 import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.eclipse.jface.action.Action;
@@ -11,7 +9,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -19,10 +16,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -34,9 +31,9 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -44,13 +41,9 @@ import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 
 import com.diabolo.eclipse.bitbucket.Activator;
-import com.diabolo.eclipse.bitbucket.Services;
+import com.diabolo.eclipse.bitbucket.BitBucketServices;
 import com.diabolo.eclipse.bitbucket.ValuePair;
-import com.diabolo.eclipse.bitbucket.api.Projects.Projects;
-import com.diabolo.eclipse.bitbucket.api.Repositories.Repositories;
-import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value;
-import org.eclipse.swt.widgets.Table;
 
 /*
  * A JFace view that displays all Pull-Requests extracted from BitBucket
@@ -71,23 +64,24 @@ public class PullRequestsView extends ViewPart {
 	@Inject
 	IWorkbench workbench;
 
-	private TreeViewer viewerPullRequests;
+	private ViewerPullRequests viewerPullRequests;
 	private DrillDownAdapter drillDownAdapter;
 	private Action collapseAllAction;
 	private Action expandAllAction;
 	private Action PullRequestClickAction;
 	private Text txtFilter;
-	private List<com.diabolo.eclipse.bitbucket.api.Projects.Value> projectsValues;
-	private List<com.diabolo.eclipse.bitbucket.api.Repositories.Value> repositoriesValues;
-	private Services services = new Services();
+	private BitBucketServices services = new BitBucketServices();
 	private Combo cboRepositories;
 	private Combo cboProjects;
 	private Combo cboFilterOn;
 	private TableViewer tableViewer;
-	private PullRequestsTreeParent invisibleRoot = new PullRequestsTreeParent("Pull Request is empty");
 	private Button btnRefresh;
 	private Composite composite;
 	private Text descriptionText;
+	private int currentCboProjectIndex;
+	private int currentCboRepositoriesIndex;
+	
+	private Cursor waitCursor = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -95,29 +89,7 @@ public class PullRequestsView extends ViewPart {
 
 		cboProjects = new Combo(parent, SWT.NONE);
 		cboProjects.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		cboProjects.add("All");
 		cboProjects.setText("Project");
-
-		cboProjects.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				initializeTreeView();
-				
-				// When the user select another project, the repository combo is automatically set to "All"
-				cboRepositories.select(0);
-				
-				// First combo's entry is always "All"
-				if (cboProjects.getSelectionIndex() == 0) {
-					cboRepositories.setEnabled(false);
-				} else {
-					fillCboRepositories();
-					cboRepositories.setEnabled(true);					
-				}
-				
-				btnRefresh.notifyListeners(SWT.Selection, new Event());
-				
-			}
-		});
 	
 		Label lblFilter = new Label(parent, SWT.NONE);
 		lblFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -129,12 +101,6 @@ public class PullRequestsView extends ViewPart {
 		btnRefresh = new Button(parent, SWT.NONE);
 		btnRefresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
-		btnRefresh.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-			}
-		});
-
 		btnRefresh.setText("Refresh");
 
 		cboRepositories = new Combo(parent, SWT.NONE);
@@ -142,13 +108,6 @@ public class PullRequestsView extends ViewPart {
 
 		cboRepositories.setText("Repository");
 		cboRepositories.setEnabled(false);
-
-		cboRepositories.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				btnRefresh.notifyListeners(SWT.Selection, new Event());				
-			}
-		});
 		
 		Label lblFilterOn = new Label(parent, SWT.NONE);
 		lblFilterOn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -167,24 +126,13 @@ public class PullRequestsView extends ViewPart {
 		scPullRequestsViewer.setBackground(Display.getCurrent().getSystemColor(SWT.BACKGROUND));
 
 		scPullRequestsViewer.setLayout(new FillLayout(SWT.HORIZONTAL));
-		
-		/*
-		 * Create the JFace TreeView object itself
-		 */
 
-		/*
-		 * Create the 2 columns table view to display
-		 * selected pull-request's data
-		 */
-		
 		viewerPullRequests = new ViewerPullRequests(scPullRequestsViewer,SWT.BORDER);
-		Tree tree = viewerPullRequests.getTree();
-		tree.setLinesVisible(true);
+		
 		drillDownAdapter = new DrillDownAdapter(viewerPullRequests);
 		
 		// Create the help context id for the viewer's control
 		workbench.getHelpSystem().setHelp(viewerPullRequests.getControl(), "com.diabolo.eclipse.bitbucket.viewer");
-		getSite().setSelectionProvider(viewerPullRequests);
 		
 		composite = new Composite(scPullRequestsViewer, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
@@ -202,45 +150,36 @@ public class PullRequestsView extends ViewPart {
 		
 		tableViewer.setLabelProvider(labelProvider);
 		
-		GridData data = new GridData(GridData.GRAB_HORIZONTAL
-				| GridData.GRAB_VERTICAL | GridData.FILL_BOTH);
+		tableViewer.getControl().setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL | GridData.FILL_BOTH));
 
-		tableViewer.getControl().setLayoutData(data);
-
+		defineListeners();
 		createTableViewerColumns();
-		
-
-		
-		btnRefresh.addListener(SWT.Selection, new Listener() {
-
-			@Override
-			public void handleEvent(Event arg0) {
-				try {
-					
-					if (cboProjects.getItemCount() <= 1) {
-						initializeData();
-					}
-					
-					initializeTreeView();
-					viewerPullRequests.setContentProvider(new ViewPullRequestsContentProvider(getViewSite(), invisibleRoot));
-					
-					viewerPullRequests.setLabelProvider(new TreeViewerLabelProvider());
-
-					viewerPullRequests.expandAll();
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-
-		initializeData();
 		makeActions();
 		hookContextMenu();
-		hookPullRequestAction();
 		contributeToActionBars();
+		
+		btnRefresh.notifyListeners(SWT.Selection, new Event());
+		cboRepositories.notifyListeners(SWT.Selection, new Event());
 	}
 
+	
+	private void FillViewerPullRequests() {
+		
+		Display.getCurrent().getActiveShell().setCursor(waitCursor);
+        
+		com.diabolo.eclipse.bitbucket.api.Projects.Value currentProjectValue = (com.diabolo.eclipse.bitbucket.api.Projects.Value) cboProjects.getData(cboProjects.getItem(currentCboProjectIndex)); 
+		com.diabolo.eclipse.bitbucket.api.Repositories.Value currentRepositoryValue = (com.diabolo.eclipse.bitbucket.api.Repositories.Value) cboRepositories.getData(cboRepositories.getItem(currentCboRepositoriesIndex));	
+	
+		PullRequestsTreeParent treeParent = new PullRequestsTreeParent("Pull Requests", currentProjectValue, currentRepositoryValue, services, txtFilter.getText(), cboFilterOn.getSelectionIndex());
+		
+		viewerPullRequests.setContentProvider(new ViewPullRequestsContentProvider(getViewSite(),treeParent));
+		viewerPullRequests.setLabelProvider(new TreeViewerLabelProvider());
+		viewerPullRequests.setInput(getViewSite());
+		viewerPullRequests.expandAll();		
+		
+		Display.getCurrent().getActiveShell().setCursor(null);
+        
+	}
 	
 	/**
 	 * Create the columns to be used.
@@ -265,157 +204,31 @@ public class PullRequestsView extends ViewPart {
 	 * using the BitBucket APIs
 	 */
 	private void initializeData() {
-		Projects projects = services.GetProjects();
-		
-		Repositories repositories = services.GetRepositories();
-
-		if (projects != null && repositories != null) {
-			repositoriesValues = repositories.getValues();
-
-			projectsValues = projects.getValues();					
-
-			projectsValues.forEach(projectValue -> {
-				cboProjects.add(projectValue.getName());
-				cboProjects.setData(projectValue.getName(), projectValue);
-			});
-
-			cboProjects.select(0);
-
-			fillCboRepositories();
-
-			initializeTreeView();
-			
-			viewerPullRequests.setContentProvider(new ViewPullRequestsContentProvider(getViewSite(), invisibleRoot));
-			viewerPullRequests.setLabelProvider(new TreeViewerLabelProvider());
-			viewerPullRequests.setInput(getViewSite());
-
-
-		} else {
-			showMessage("BitBucket repositories and/or projects not found.\nCheck you settings and your network connectivity.");
-		}
-		
+		System.out.println("initializeData");
+		services.Update();
+		fillCboProjects();
+		fillCboRepositories();
+		FillViewerPullRequests();
 	}
 
-	private void initializeTreeView() {
-		
-		invisibleRoot = null;
-		
-		PullRequestsTreeParent root = new PullRequestsTreeParent("");
-
-		int idxProject = cboProjects.getSelectionIndex();
-		int idxRepositories = cboRepositories.getSelectionIndex();
-
-		com.diabolo.eclipse.bitbucket.api.Repositories.Value repositoryValue = new com.diabolo.eclipse.bitbucket.api.Repositories.Value();
-		
-		if (cboRepositories.getData(cboRepositories.getItem(idxRepositories).toString()) instanceof com.diabolo.eclipse.bitbucket.api.Repositories.Value) {
-			repositoryValue = (com.diabolo.eclipse.bitbucket.api.Repositories.Value) cboRepositories.getData(cboRepositories.getItem(idxRepositories).toString()); 
-		} 
-
-		com.diabolo.eclipse.bitbucket.api.Projects.Value projectValue = new com.diabolo.eclipse.bitbucket.api.Projects.Value();
-		
-		if (cboProjects.getData(cboProjects.getItem(idxProject).toString()) instanceof com.diabolo.eclipse.bitbucket.api.Projects.Value) {
-			projectValue = (com.diabolo.eclipse.bitbucket.api.Projects.Value) cboProjects.getData(cboProjects.getItem(idxProject).toString()); 
-		} 
-
-		final com.diabolo.eclipse.bitbucket.api.Projects.Value currentProjectValue = projectValue;
-		final com.diabolo.eclipse.bitbucket.api.Repositories.Value currentRepositoryValue = repositoryValue;
-
-		/*
-		 * Parse all repositories, 
-		 * parse all projects of repositories,
-		 * get all open pull-requests of projects
-		 * 
-		 */
-		if (repositoriesValues.size() > 0) {
-			
-			repositoriesValues.forEach(repository -> {
-			
-				PullRequestForRepository pullRequests;
-				
-				List<com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value> pullRequestValues;
-
-				if (cboProjects.getItemCount() > 0 && cboRepositories.getItemCount() > 0) {
-
-					String repositoryTreeValue = repository.getName();
-					
-					/*
-					 * Filter the repositories with the repository-combo's value
-					 */
-					if (idxRepositories == 0 || currentRepositoryValue.getId() == repository.getId()) {
-						
-						/*
-						 * Filter the projects with the project-combo's value
-						 */
-						if (idxProject == 0	|| repository.getProject().getId().compareTo(currentProjectValue.getId()) == 0) {
-							
-							pullRequests = services.GetPullRequestsForRepo(repository.getProject().getKey(), repository.getName());
-							
-							if (pullRequests != null) {
-								
-								pullRequestValues = pullRequests.getValues();
 	
-								if (pullRequestValues.size() > 0) {
-									
-									PullRequestsTreeParent repositoryTree = new PullRequestsTreeParent(repositoryTreeValue);
+	private void fillCboProjects() {
+		System.out.println("fillCboProjects");
+		
+        
+		cboProjects.removeAll();
+		cboProjects.add("All");
+		
+		services.projectsValues.forEach(projectValue -> {
+			cboProjects.add(projectValue.getName());
+			cboProjects.setData(projectValue.getName(), projectValue);
+		});
 
-									pullRequestValues.forEach(prValue -> {
-
-										/*
-										 * For each pull-request, fill the tree-view
-										 */
-										String treeName = String.format("%s - %s", prValue.getTitle(),
-												prValue.getAuthor().getUser().getDisplayName());
-									
-										/*
-										 * Apply the filters
-										 */
-										if (!txtFilter.getText().isBlank()) {
-
-											switch (cboFilterOn.getSelectionIndex()) {
-											case 0:
-												// Filter on Pull Request's title
-												if (prValue.getTitle().toLowerCase().contains(txtFilter.getText().toLowerCase())) {
-													PullRequestsTreeObject pullRequest = new PullRequestsTreeObject(treeName, prValue);
-													repositoryTree.addChild(pullRequest);
-												}
-												break;
-											case 1:
-												// Filter on Pull Request's source branch name
-												if (prValue.getFromRef().getDisplayId().toLowerCase().contains(txtFilter.getText().toLowerCase())) {
-													PullRequestsTreeObject pullRequest = new PullRequestsTreeObject(treeName, prValue);
-													repositoryTree.addChild(pullRequest);
-												}
-												break;
-											case 2:
-												// Filter on Pull Request's target branch name
-												if (prValue.getToRef().getDisplayId().toLowerCase().contains(txtFilter.getText().toLowerCase())) {
-													PullRequestsTreeObject pullRequest = new PullRequestsTreeObject(treeName, prValue);
-													repositoryTree.addChild(pullRequest);
-												}
-												break;
-											}
-										} else {
-											PullRequestsTreeObject pullRequest = new PullRequestsTreeObject(treeName, prValue);
-											repositoryTree.addChild(pullRequest);
-										}
-										
-									});
-
-									root.addChild(repositoryTree);
-								}
-							}
-						}
-					}
-				}
-			});
-
-			invisibleRoot = root;
-		} else {
-			showMessage("No BitBucket repository found. Nothing to display\n. Check your settings and your network connectivity.");
-		}
-
+		cboProjects.select(0);
+		cboRepositories.select(0);
+		
 	}
-
+	
 	
 	/*
 	 * Get all repositories from BitBucket using the APIs
@@ -423,6 +236,7 @@ public class PullRequestsView extends ViewPart {
 	 * The first entry is always 'All'
 	 */
 	private void fillCboRepositories() {
+System.out.println("fillCboRepositories");
 
 		cboRepositories.removeAll();
 
@@ -430,26 +244,25 @@ public class PullRequestsView extends ViewPart {
 
 		com.diabolo.eclipse.bitbucket.api.Projects.Value projectValue = (com.diabolo.eclipse.bitbucket.api.Projects.Value) cboProjects.getData(cboProjects.getItem(cboProjects.getSelectionIndex())); 
 		
-		if (repositoriesValues.size() > 1) {
-			repositoriesValues.forEach(repository -> {
+		services.repositoriesValues.forEach(repository -> {
 
-				int projectValueId = -1;
-				if (projectValue != null) {
-					projectValueId = projectValue.getId();
+			int projectValueId = -1;
+			if (projectValue != null) {
+				projectValueId = projectValue.getId();
+			}
+			
+			if (repository.getProject().getId() == projectValueId || cboProjects.getSelectionIndex() == 0) {
+				if (repository.getProject().getType().compareTo("NORMAL") == 0) {
+					String cboRepositoryValue = repository.getName();
+					cboRepositories.add(cboRepositoryValue);
+					cboRepositories.setData(cboRepositoryValue, repository);
 				}
-				
-				if (repository.getProject().getId() == projectValueId || cboProjects.getSelectionIndex() == 0) {
-					if (repository.getProject().getType().compareTo("NORMAL") == 0) {
-						String cboRepositoryValue = repository.getName();
-						cboRepositories.add(cboRepositoryValue);
-						cboRepositories.setData(cboRepositoryValue, repository);
-					}
-				}
-			});			
-		}
+			}
+		});			
 
 		cboRepositories.update();
 		cboRepositories.select(0);
+		
 	}
 
 	
@@ -611,24 +424,60 @@ public class PullRequestsView extends ViewPart {
 	/*
 	 * Link the Actions to the tree-view
 	 */
-	private void hookPullRequestAction() {
-		if (viewerPullRequests != null) {
+	private void defineListeners() {
+
+		cboRepositories.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				currentCboRepositoriesIndex = cboRepositories.getSelectionIndex();
+				FillViewerPullRequests();				
+			}
+		});
+
 			
-			viewerPullRequests.addSelectionChangedListener(new ISelectionChangedListener() {
-			   public void selectionChanged(SelectionChangedEvent event) {
-			       if(event.getSelection() instanceof IStructuredSelection) {
-			    	   PullRequestClickAction.run();
-			       }
-			   }
-			});
-		}
+		viewerPullRequests.addSelectionChangedListener(new ISelectionChangedListener() {
+		   public void selectionChanged(SelectionChangedEvent event) {
+		       if(event.getSelection() instanceof IStructuredSelection) {
+		    	   PullRequestClickAction.run();
+		       }
+		   }
+		});
+
+		btnRefresh.addListener(SWT.Selection, new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				initializeData();
+			}
+		});
+
+		cboProjects.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// When the user select another project, the repository combo is automatically set to "All"
+				cboRepositories.select(0);
+				
+				// First combo's entry is always "All"
+				if (cboProjects.getSelectionIndex() == 0) {
+					cboRepositories.setEnabled(false);
+				} else {
+					fillCboRepositories();
+					cboRepositories.setEnabled(true);					
+				}
+				currentCboProjectIndex = cboProjects.getSelectionIndex();
+				FillViewerPullRequests();
+			}
+		});
+		
+		btnRefresh.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
+
 	}
 
-	private void showMessage(String message) {
-		MessageDialog.openInformation(viewerPullRequests.getControl().getShell(), "Pull Requests", message);
-	}
-
-	@Override
+	
 	public void setFocus() {
 		if (viewerPullRequests != null) {
 			viewerPullRequests.getControl().setFocus();
