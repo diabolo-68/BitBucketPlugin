@@ -1,6 +1,4 @@
-package com.diabolo.eclipse.bitbucket.views;
-
-import java.net.URL;
+package com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree;
 
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
@@ -11,7 +9,7 @@ import org.eclipse.swt.widgets.Display;
 import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value;
 
-public class TreeViewerLabelProvider extends StyledCellLabelProvider {
+public class PullRequestTreeViewerLabelProvider extends StyledCellLabelProvider {
     
     Display display = Display.getDefault();
 
@@ -20,11 +18,10 @@ public class TreeViewerLabelProvider extends StyledCellLabelProvider {
 
         Object element = cell.getElement();
         StyledString styledString = new StyledString();
-        URL imageUrl;
         
-        if (element instanceof PullRequestsTreeParent) {
+        if (element instanceof PullRequestTreeViewerTreeParent) {
         	
-        	PullRequestsTreeParent parent = (PullRequestsTreeParent) element;
+        	PullRequestTreeViewerTreeParent parent = (PullRequestTreeViewerTreeParent) element;
             styledString.append(parent.getName());
 			cell.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW));
 			
@@ -32,11 +29,11 @@ public class TreeViewerLabelProvider extends StyledCellLabelProvider {
         	cell.setImage(Activator.getImage(Activator.ICON_PROJECT));
         	
         	
-        } else if (element instanceof PullRequestsTreeObject) {
+        } else if (element instanceof PullRequestTreeViewerDataContainer) {
         	/*
         	 * Get the pull-request's data stored in the node's object
         	 */
-        	PullRequestsTreeObject node = (PullRequestsTreeObject) element;
+        	PullRequestTreeViewerDataContainer node = (PullRequestTreeViewerDataContainer) element;
         	styledString.append(node.getName());
 
         	Value prValue = ((Value) node.getData());

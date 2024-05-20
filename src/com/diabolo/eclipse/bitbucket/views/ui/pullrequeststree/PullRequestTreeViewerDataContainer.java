@@ -1,18 +1,18 @@
-package com.diabolo.eclipse.bitbucket.views;
+package com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree;
 
 import org.eclipse.core.runtime.IAdaptable;
 
-class PullRequestsTreeObject implements IAdaptable {
+public class PullRequestTreeViewerDataContainer implements IAdaptable {
 	
 	private String name;
-	private PullRequestsTreeParent parent;
+	private PullRequestTreeViewerTreeParent parent;
 	private Object data;
 
-	public PullRequestsTreeObject(String name) {
+	public PullRequestTreeViewerDataContainer(String name) {
 		this.name = name;
 	}
 
-	public PullRequestsTreeObject(String name, Object data) {
+	public PullRequestTreeViewerDataContainer(String name, Object data) {
 		this.name = name;
 		this.data = data;
 	}
@@ -25,11 +25,11 @@ class PullRequestsTreeObject implements IAdaptable {
 		return name;
 	}
 
-	public void setParent(PullRequestsTreeParent parent) {
+	public void setParent(PullRequestTreeViewerTreeParent parent) {
 		this.parent = parent;
 	}
 
-	public PullRequestsTreeParent getParent() {
+	public PullRequestTreeViewerTreeParent getParent() {
 		return parent;
 	}
 

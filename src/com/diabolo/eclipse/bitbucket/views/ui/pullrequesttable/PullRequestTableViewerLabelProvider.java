@@ -1,4 +1,4 @@
-package com.diabolo.eclipse.bitbucket.views;
+package com.diabolo.eclipse.bitbucket.views.ui.pullrequesttable;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableColorProvider;
@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Event;
 import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.ValuePair;
 
-public class TableViewerLabelProvider extends OwnerDrawLabelProvider implements ITableLabelProvider, ITableFontProvider, ITableColorProvider {
+public class PullRequestTableViewerLabelProvider extends OwnerDrawLabelProvider implements ITableLabelProvider, ITableFontProvider, ITableColorProvider {
 
     Display display = Display.getDefault();
 	private TableViewer viewer;

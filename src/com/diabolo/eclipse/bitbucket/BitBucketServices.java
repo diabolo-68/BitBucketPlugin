@@ -16,20 +16,35 @@ import com.diabolo.eclipse.bitbucket.api.PullRequestsForCurrentUser.PullRequests
 import com.diabolo.eclipse.bitbucket.api.Repositories.Repositories;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
-import com.diabolo.eclipse.bitbucket.views.ViewerPullRequests;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 public class BitBucketServices {
 
 	private URL url;
+	private String host;
+	private String basePath;
+	private String auth;
+
 	public Projects projects;
 	public Repositories repositories;
 	
 	public List<com.diabolo.eclipse.bitbucket.api.Projects.Value> projectsValues;
 	public List<com.diabolo.eclipse.bitbucket.api.Repositories.Value> repositoriesValues;
 	
+	
+	public BitBucketServices() {
+		super();
+        ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "com.diabolo.eclipse.bitbucket");
+    	auth = "Basic " + Base64.getEncoder().encodeToString((store.getString(PreferenceConstants.P_BBUSER) + ":"
+                + store.getString(PreferenceConstants.P_BBPASSWORD)).getBytes());;
+        host = store.getString(PreferenceConstants.P_HOST);
+        basePath = store.getString(PreferenceConstants.P_BASEPATH);
+        Update();
+	}
+
 	public void Update() {
+		System.out.println("Update Data");		
 		projects = GetProjects();
 		repositories = GetRepositories();
 		if (projects != null && repositories != null) {
@@ -38,21 +53,6 @@ public class BitBucketServices {
 		}
 	}
 	
-	public BitBucketServices() {
-		super();
-        ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE,
-                "com.diabolo.eclipse.bitbucket");
-    	auth = "Basic " + Base64.getEncoder().encodeToString((store.getString(PreferenceConstants.P_BBUSER) + ":"
-                + store.getString(PreferenceConstants.P_BBPASSWORD)).getBytes());;
-        host = store.getString(PreferenceConstants.P_HOST);
-        basePath = store.getString(PreferenceConstants.P_BASEPATH);
-
-	}
-
-	private String host;
-	private String basePath;
-	private String auth;
-
 	/**
 	 * @param url the url to set
 	 * @throws MalformedURLException 

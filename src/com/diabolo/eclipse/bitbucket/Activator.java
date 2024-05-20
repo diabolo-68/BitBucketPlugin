@@ -1,6 +1,5 @@
 package com.diabolo.eclipse.bitbucket;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -10,7 +9,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.diabolo.eclipse.bitbucket.views.ViewerPullRequests;
+import com.diabolo.eclipse.bitbucket.views.PullRequestsView;
+import com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree.PullRequestTreeViewer;
 
 public class Activator extends AbstractUIPlugin {
 
@@ -32,10 +32,36 @@ public class Activator extends AbstractUIPlugin {
     private static ImageRegistry imageRegistry;
     
 	private static Activator plugin;
+
+	private static BitBucketServices services;
 	
+	private static PullRequestsView pullRequestView;
+	
+	/**
+	 * @return the pullRequestView
+	 */
+	public static PullRequestsView getPullRequestView() {
+		return pullRequestView;
+	}
+
+	/**
+	 * @param pullRequestView the pullRequestView to set
+	 */
+	public static void setPullRequestView(PullRequestsView pullRequestView) {
+		Activator.pullRequestView = pullRequestView;
+	}
+
+	/**
+	 * @return the services
+	 */
+	public static BitBucketServices getServices() {
+		return services;
+	}
+
 	public Activator() {
 		plugin = this;
 		initializeImageRegistry(getImageRegistry());
+		services = new BitBucketServices();
 	}
 
 	@Override
@@ -112,7 +138,7 @@ public class Activator extends AbstractUIPlugin {
     }    
     
     // replace viewerPullRequests
-	public static void showMessage(ViewerPullRequests viewerPullRequests, String message ) {
+	public static void showMessage(PullRequestTreeViewer viewerPullRequests, String message ) {
 		MessageDialog.openInformation(viewerPullRequests.getControl().getShell(), "Pull Requests", message);
 	}
     
