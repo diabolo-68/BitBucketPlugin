@@ -42,7 +42,6 @@ public class PullRequestTableViewer extends org.eclipse.jface.viewers.TableViewe
 	private void setListeners() {
 		setContentProvider(ArrayContentProvider.getInstance());
 		PullRequestTableViewerLabelProvider labelProvider = new PullRequestTableViewerLabelProvider();
-		labelProvider.setViewer(this);
 		setLabelProvider(labelProvider);
 	}
 	

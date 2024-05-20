@@ -7,10 +7,7 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IViewPart;
-
 import com.diabolo.eclipse.bitbucket.Activator;
-import com.diabolo.eclipse.bitbucket.views.PullRequestsView;
 
 
 public class PullRequestTreeViewer extends org.eclipse.jface.viewers.TreeViewer{
@@ -19,30 +16,20 @@ public class PullRequestTreeViewer extends org.eclipse.jface.viewers.TreeViewer{
 	 * @wbp.parser.entryPoint
 	 */
 	
-	public IViewPart viewpart; 
-	private PullRequestsView view;
 	private Cursor waitCursor = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
 	
 	public PullRequestTreeViewerClickAction PullRequestClickAction;
 
 	
-	public PullRequestTreeViewer(Composite parent, PullRequestsView view, int style) {
+	public PullRequestTreeViewer(Composite parent, int style) {
 		super(parent, style);
-		this.view = view;
 		
 		setExpandPreCheckFilters(true);
 		setAutoExpandLevel(10);
 		addSelectionChangedListener(((ISelectionChangedListener) new PullRequestTreeViewerSelectionChangedListener(this)));	
-	}
-
-
-	/**
-	 * @param viewpart the viewpart to set()
-	 */
-	public void setViewpart(IViewPart viewpart) {
-		this.viewpart = viewpart;
 		hookContextMenu();
 	}
+
 
 	public void fill(PullRequestTreeViewerTreeParent treeParent) {
 		
@@ -55,9 +42,9 @@ System.out.println("FillViewerPullRequests");
 		if (Activator.getServices().projects != null && Activator.getServices().repositories != null) {
 			
 			
-			setContentProvider(new PullRequestTreeViewerContentProvider(view.getViewSite(),treeParent));
+			setContentProvider(new PullRequestTreeViewerContentProvider(treeParent));
 			setLabelProvider(new com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree.PullRequestTreeViewerLabelProvider());
-			setInput(view.getViewSite());
+			setInput(Activator.getPullRequestView().getViewSite());
 			expandAll();					
 		}
 
@@ -78,6 +65,6 @@ System.out.println("FillViewerPullRequests");
 
 		Menu menu = menuMgr.createContextMenu(getControl());
 		getControl().setMenu(menu);
-		viewpart.getSite().registerContextMenu(menuMgr, this);
+		Activator.getPullRequestView().getSite().registerContextMenu(menuMgr, this);
 	}
 }

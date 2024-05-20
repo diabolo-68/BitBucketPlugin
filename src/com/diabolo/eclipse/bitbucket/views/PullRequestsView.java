@@ -32,9 +32,6 @@ import com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree.PullRequestTreeVi
  * in a table.
  */
 public class PullRequestsView extends ViewPart {
-	public PullRequestsView() {
-		Activator.setPullRequestView(this);
-	}
 	
 	/**
 	 * The ID of the view as specified by the extension.
@@ -61,9 +58,10 @@ public class PullRequestsView extends ViewPart {
 	
 	public void createPartControl(Composite parent) {
 		
+		Activator.setPullRequestView(this);
 		parent.setLayout(new GridLayout(4, false));
 
-		cboProjects = new ProjectsCombo(parent, this, SWT.NONE);
+		cboProjects = new ProjectsCombo(parent, SWT.NONE);
 	
 		Label lblFilter = new Label(parent, SWT.NONE);
 		lblFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -75,7 +73,7 @@ public class PullRequestsView extends ViewPart {
 		btnApplyFilter = new Button(parent, SWT.NONE);
 		btnApplyFilter.setText("Apply Filter");
 		
-		cboRepositories = new RepositoriesCombo(parent, this, SWT.NONE);
+		cboRepositories = new RepositoriesCombo(parent, SWT.NONE);
 
 		Label lblFilterOn = new Label(parent, SWT.NONE);
 		lblFilterOn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -97,8 +95,7 @@ public class PullRequestsView extends ViewPart {
 
 		scPullRequestsViewer.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		pullRequestsTreeViewer = new PullRequestTreeViewer(scPullRequestsViewer,this, SWT.BORDER);
-		pullRequestsTreeViewer.setViewpart(this);
+		pullRequestsTreeViewer = new PullRequestTreeViewer(scPullRequestsViewer, SWT.BORDER);
 
 		// Create the help context id for the viewer's control
 		workbench.getHelpSystem().setHelp(pullRequestsTreeViewer.getControl(), "com.diabolo.eclipse.bitbucket.viewer");

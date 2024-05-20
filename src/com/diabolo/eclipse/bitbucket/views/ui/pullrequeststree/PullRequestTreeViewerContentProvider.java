@@ -3,22 +3,22 @@ package com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.ui.IViewSite;
 
+import com.diabolo.eclipse.bitbucket.Activator;
+
 public class PullRequestTreeViewerContentProvider implements ITreeContentProvider {
 
-	private IViewSite iViewSite;
 	private PullRequestTreeViewerTreeParent invisibleRoot;
 	
 	public Object[] getElements(Object parent) {
-		if (parent.equals(iViewSite)) {
+		if (parent.equals(Activator.getPullRequestView().getViewSite())) {
 			
 			return getChildren(invisibleRoot);
 		}
 		return getChildren(parent);
 	}
 
-	public PullRequestTreeViewerContentProvider(IViewSite iViewSite, PullRequestTreeViewerTreeParent invisibleRoot) {
+	public PullRequestTreeViewerContentProvider(PullRequestTreeViewerTreeParent invisibleRoot) {
 		super();
-		this.iViewSite = iViewSite;
 		this.invisibleRoot = invisibleRoot;
 	}
 

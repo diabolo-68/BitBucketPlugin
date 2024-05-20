@@ -9,6 +9,8 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.DrillDownAdapter;
 
+import com.diabolo.eclipse.bitbucket.Activator;
+
 public class PullRequestTreeViewerMenuListener implements IMenuListener {
 
 	private PullRequestTreeViewer parent;
@@ -57,7 +59,7 @@ public class PullRequestTreeViewerMenuListener implements IMenuListener {
 	 * Add a toolbar in the view
 	 */
 	private void setActionBars() {
-		IActionBars bars = parent.viewpart.getViewSite().getActionBars();
+		IActionBars bars = Activator.getPullRequestView().getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
 		fillLocalToolBar(bars.getToolBarManager());
 	}	

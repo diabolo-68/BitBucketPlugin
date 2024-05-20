@@ -22,6 +22,6 @@ public class PullRequestTreeViewerCollapseAllAction extends Action{
 	}
 	
 	public void run() {
-		viewer.expandAll();
+		viewer.collapseAll();
 	}
 }

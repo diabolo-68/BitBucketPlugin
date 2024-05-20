@@ -9,8 +9,8 @@ import com.diabolo.eclipse.bitbucket.views.ui.pullrequesttable.PullRequestTableV
 public class PullRequestTreeViewerClickAction extends Action{
 
 	private PullRequestTableViewer tableViewer;
-	private Text descriptionText;
 	private PullRequestTreeViewer treeViewer;
+	private Text descriptionText;
 	
 	
 	public PullRequestTreeViewerClickAction(PullRequestTableViewer tableViewer, PullRequestTreeViewer treeViewer, Text descriptionText) {
