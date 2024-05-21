@@ -35,12 +35,10 @@ public class BitBucketServices {
 	
 	public BitBucketServices() {
 		super();
-        ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "com.diabolo.eclipse.bitbucket");
-    	auth = "Basic " + Base64.getEncoder().encodeToString((store.getString(PreferenceConstants.P_BBUSER) + ":"
-                + store.getString(PreferenceConstants.P_BBPASSWORD)).getBytes());;
-        host = store.getString(PreferenceConstants.P_HOST);
-        basePath = store.getString(PreferenceConstants.P_BASEPATH);
-        Update();
+    	auth = "Basic " + Base64.getEncoder().encodeToString((Activator.getStore().getString(PreferenceConstants.P_BBUSER) + ":"
+                + Activator.getStore().getString(PreferenceConstants.P_BBPASSWORD)).getBytes());;
+        host = Activator.getStore().getString(PreferenceConstants.P_HOST);
+        basePath = Activator.getStore().getString(PreferenceConstants.P_BASEPATH);
 	}
 
 	public void Update() {

@@ -2,11 +2,13 @@ package com.diabolo.eclipse.bitbucket;
 
 import java.net.URL;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
 import com.diabolo.eclipse.bitbucket.views.PullRequestsView;
@@ -36,6 +38,16 @@ public class Activator extends AbstractUIPlugin {
 	private static BitBucketServices services;
 	
 	private static PullRequestsView pullRequestView;
+	
+    private static ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "com.diabolo.eclipse.bitbucket");
+
+	/**
+	 * @return the store
+	 */
+	public static ScopedPreferenceStore getStore() {
+		return store;
+	}
+
 	
 	/**
 	 * @return the pullRequestView

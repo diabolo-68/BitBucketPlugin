@@ -1,5 +1,6 @@
 package com.diabolo.eclipse.bitbucket.views;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -9,8 +10,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.diabolo.eclipse.bitbucket.Activator;
+import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
 
 /*
  * By using composition, we avoid the SWTException related to subclassing
@@ -19,7 +22,8 @@ import com.diabolo.eclipse.bitbucket.Activator;
 public class RepositoriesCombo extends Composite {
 
     private ComboViewer comboViewer;
-	
+    private ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "com.diabolo.eclipse.bitbucket");
+    
     public RepositoriesCombo(Composite parent, int style) {
         super(parent, style);
         
@@ -32,7 +36,7 @@ public class RepositoriesCombo extends Composite {
         comboViewer = new ComboViewer(this, SWT.DROP_DOWN | SWT.READ_ONLY);
         // Set a fixed width for the Combo
         GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-        gridData.widthHint = 150;  // Set desired width in pixels
+        gridData.widthHint = store.getInt(PreferenceConstants.P_COMBOSIZE);
         comboViewer.getCombo().setLayoutData(gridData);
         comboViewer.getCombo().setText("Repositories");
         
@@ -46,6 +50,7 @@ public class RepositoriesCombo extends Composite {
         		
         comboViewer.getCombo().removeAll();
         comboViewer.add("All");
+        comboViewer.getCombo().select(0);
         
         // First combo's entry is always "All"
         if (cboProjects.getCombo().getSelectionIndex() != 0) {
@@ -72,12 +77,23 @@ public class RepositoriesCombo extends Composite {
 	                    }
 	                }
 	            });
+	        	/*
+	        	 * Set the default value
+	        	 * If this corresponds to a repository that no longer exists,
+	        	 * select "All" 
+	        	 */
+	        	try {
+	        		System.out.println("Default Repo:" + Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_REPOSITORY));
+	        		comboViewer.getCombo().select(Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_REPOSITORY));
+	        	} catch (Exception e) {
+	        		System.out.println("Default Repo failed");
+	        		comboViewer.getCCombo().select(0);
+	        	}
             }
         } else {
         	comboViewer.getCombo().setEnabled(false);
         }
         
-        comboViewer.getCombo().select(0);
         comboViewer.getCombo().update();
     }
 

@@ -1,13 +1,16 @@
 package com.diabolo.eclipse.bitbucket.views;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.diabolo.eclipse.bitbucket.Activator;
+import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
 
 /*
  * By using composition, you avoid the SWTException related to subclassing
@@ -16,7 +19,7 @@ import com.diabolo.eclipse.bitbucket.Activator;
 public class ProjectsCombo extends Composite {
 
     private ComboViewer comboViewer;
-    
+	
     public ProjectsCombo(Composite parent, int style) {
         super(parent, style);
         
@@ -26,7 +29,7 @@ public class ProjectsCombo extends Composite {
         comboViewer = new ComboViewer(this, SWT.DROP_DOWN | SWT.READ_ONLY);
         // Set a fixed width for the Combo
         GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-        gridData.widthHint = 150;  // Set desired width in pixels
+        gridData.widthHint = Activator.getStore().getInt(PreferenceConstants.P_COMBOSIZE);
         comboViewer.getCombo().setLayoutData(gridData);
         comboViewer.getCombo().setText("Project");
         comboViewer.getCombo().addSelectionListener(new ProjectsComboSelectionListener());
@@ -37,14 +40,25 @@ public class ProjectsCombo extends Composite {
 
         comboViewer.getCombo().removeAll();
         comboViewer.getCombo().add("All");
+        comboViewer.getCombo().select(0);
 
         if (Activator.getServices().projectsValues != null) {
         	Activator.getServices().projectsValues.forEach(projectValue -> {
                 comboViewer.getCombo().add(projectValue.getName());
                 comboViewer.getCombo().setData(projectValue.getName(), projectValue);
             });
+        	/*
+        	 * Set the default value
+        	 * If this corresponds to a project that no longer exists,
+        	 * select "All" 
+        	 */
+        	try {
+        		System.out.println("Project default:" + Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_PROJECT));
+        		comboViewer.getCombo().select(Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_PROJECT));
+        	} catch (Exception e) {
+        		comboViewer.getCCombo().select(0);
+        	}
         }
-        comboViewer.getCombo().select(0);
         comboViewer.getCombo().update();
     }
 
@@ -53,7 +67,6 @@ public class ProjectsCombo extends Composite {
     }
     
     public int getSelectionIndex() {
-    	System.out.println(comboViewer.getCombo().getSelectionIndex());
     	return comboViewer.getCombo().getSelectionIndex();
     }
     
@@ -66,7 +79,6 @@ public class ProjectsCombo extends Composite {
     }
 
     public Object getData(String key) {
-    	System.out.println(comboViewer.getCombo().getData(key));
     	return comboViewer.getCombo().getData(key);
     }
     
