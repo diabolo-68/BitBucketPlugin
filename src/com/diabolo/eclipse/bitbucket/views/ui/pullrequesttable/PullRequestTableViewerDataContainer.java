@@ -1,6 +1,6 @@
-package com.diabolo.eclipse.bitbucket;
+package com.diabolo.eclipse.bitbucket.views.ui.pullrequesttable;
 
-public class ValuePair {
+public class PullRequestTableViewerDataContainer {
 	private String imageKey;
 	private String key;
 	private String value;
@@ -49,20 +49,20 @@ public class ValuePair {
 		this.value = value;
 	}
 
-	public ValuePair(String key, String value) {
+	public PullRequestTableViewerDataContainer(String key, String value) {
 		super();
 		this.key = key;
 		this.value = value;
 	}
 
-	public ValuePair(String key, String value, Integer index) {
+	public PullRequestTableViewerDataContainer(String key, String value, Integer index) {
 		super();
 		this.key = key;
 		this.value = value;
 		this.index = index;
 	}
 
-	public ValuePair(String imageKey, String key, String value, Integer index) {
+	public PullRequestTableViewerDataContainer(String imageKey, String key, String value, Integer index) {
 		super();
 		this.imageKey = imageKey;
 		this.key = key;

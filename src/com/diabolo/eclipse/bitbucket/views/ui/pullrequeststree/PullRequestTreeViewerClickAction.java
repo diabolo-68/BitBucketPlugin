@@ -4,6 +4,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Text;
 
+import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value;
 import com.diabolo.eclipse.bitbucket.views.ui.pullrequesttable.PullRequestTableViewer;
 
 public class PullRequestTreeViewerClickAction extends Action{
@@ -23,8 +24,20 @@ public class PullRequestTreeViewerClickAction extends Action{
 	public void run() {
 		IStructuredSelection selection = treeViewer.getStructuredSelection();
 		
-		PullRequestTreeViewerDataContainer obj = (PullRequestTreeViewerDataContainer) selection.getFirstElement();
-
-		tableViewer.fillTable(obj, descriptionText);
+		PullRequestTreeViewerDataContainer prValueData = (PullRequestTreeViewerDataContainer) selection.getFirstElement();
+		
+		descriptionText.setText("");
+		
+		if (prValueData != null) {
+			tableViewer.fillTable(prValueData.getTableLines());
+			
+			if (prValueData.getData() instanceof Value) {
+				Value prValue = ((Value) prValueData.getData());
+			
+				if (prValue.getDescription() != null) {
+					descriptionText.setText(prValue.getDescription());
+				}
+			}			
+		}
 	}
 }

@@ -11,7 +11,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.diabolo.eclipse.bitbucket.Activator;
-import com.diabolo.eclipse.bitbucket.ValuePair;
 
 public class PullRequestTableViewerLabelProvider implements ITableLabelProvider, ITableFontProvider, ITableColorProvider {
 
@@ -19,8 +18,8 @@ public class PullRequestTableViewerLabelProvider implements ITableLabelProvider,
  
     @Override
     public String getColumnText(Object element, int columnIndex) {
-        if (element instanceof ValuePair) {
-            ValuePair pair = (ValuePair) element;
+        if (element instanceof PullRequestTableViewerDataContainer) {
+            PullRequestTableViewerDataContainer pair = (PullRequestTableViewerDataContainer) element;
             if (columnIndex == 0) {
                 return pair.getKey();
             } else if (columnIndex == 1) {
@@ -32,16 +31,16 @@ public class PullRequestTableViewerLabelProvider implements ITableLabelProvider,
 
     @Override
     public Image getColumnImage(Object element, int colmnIndex) {
-        if (element instanceof ValuePair && colmnIndex == 0) {
-            return Activator.getImage(((ValuePair) element).getImageKey());
+        if (element instanceof PullRequestTableViewerDataContainer && colmnIndex == 0) {
+            return Activator.getImage(((PullRequestTableViewerDataContainer) element).getImageKey());
         }
         return null;
     }
 
     @Override
     public Color getBackground(Object element, int columnIndex) {
-        if (element instanceof ValuePair) {
-            if (((ValuePair) element).getIndex() % 2 == 0) {
+        if (element instanceof PullRequestTableViewerDataContainer) {
+            if (((PullRequestTableViewerDataContainer) element).getIndex() % 2 == 0) {
                 return display.getSystemColor(SWT.COLOR_DARK_GRAY);
             }
         }
@@ -50,8 +49,8 @@ public class PullRequestTableViewerLabelProvider implements ITableLabelProvider,
 
     @Override
     public Color getForeground(Object element, int columnIndex) {
-        if (element instanceof ValuePair) {
-            if (((ValuePair) element).getIndex() % 2 == 0) {
+        if (element instanceof PullRequestTableViewerDataContainer) {
+            if (((PullRequestTableViewerDataContainer) element).getIndex() % 2 == 0) {
                 return display.getSystemColor(SWT.COLOR_WHITE);
             }
         }
