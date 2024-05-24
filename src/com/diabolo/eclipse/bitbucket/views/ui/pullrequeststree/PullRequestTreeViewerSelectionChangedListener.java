@@ -18,7 +18,6 @@ public class PullRequestTreeViewerSelectionChangedListener implements ISelection
 	@Override
 	   public void selectionChanged(SelectionChangedEvent event) {
 	       if(event.getSelection() instanceof IStructuredSelection) {
-	    	   System.out.println("TreeView Selection");
 	    	   parent.PullRequestClickAction.run();
 	       };
 	}

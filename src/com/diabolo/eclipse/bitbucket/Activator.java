@@ -41,6 +41,43 @@ public class Activator extends AbstractUIPlugin {
 	
     private static ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "com.diabolo.eclipse.bitbucket");
 
+    private static boolean cboProjectsInitiated = false;
+    
+    private static boolean cboRepositoriesInitialited = false;
+    
+    
+	/**
+	 * @return the cboProjectsInitiated
+	 */
+	public static boolean isCboProjectsInitiated() {
+		return cboProjectsInitiated;
+	}
+
+
+	/**
+	 * @param cboProjectsInitiated the cboProjectsInitiated to set
+	 */
+	public static void setCboProjectsInitiated(boolean cboProjectsInitiated) {
+		Activator.cboProjectsInitiated = cboProjectsInitiated;
+	}
+
+
+	/**
+	 * @return the cboRepositoriesInitialited
+	 */
+	public static boolean isCboRepositoriesInitialited() {
+		return cboRepositoriesInitialited;
+	}
+
+
+	/**
+	 * @param cboRepositoriesInitialited the cboRepositoriesInitialited to set
+	 */
+	public static void setCboRepositoriesInitialited(boolean cboRepositoriesInitialited) {
+		Activator.cboRepositoriesInitialited = cboRepositoriesInitialited;
+	}
+
+
 	/**
 	 * @return the store
 	 */

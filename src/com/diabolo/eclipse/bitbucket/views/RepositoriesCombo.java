@@ -46,7 +46,6 @@ public class RepositoriesCombo extends Composite {
     }
 
     public void fill(ProjectsCombo cboProjects) {
-        System.out.println("fillCboRepositories");
         		
         comboViewer.getCombo().removeAll();
         comboViewer.add("All");
@@ -82,12 +81,13 @@ public class RepositoriesCombo extends Composite {
 	        	 * If this corresponds to a repository that no longer exists,
 	        	 * select "All" 
 	        	 */
-	        	try {
-	        		System.out.println("Default Repo:" + Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_REPOSITORY));
-	        		comboViewer.getCombo().select(Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_REPOSITORY));
-	        	} catch (Exception e) {
-	        		System.out.println("Default Repo failed");
-	        		comboViewer.getCCombo().select(0);
+	        	if (Activator.isCboRepositoriesInitialited() == false) {
+	        		try {
+	        			comboViewer.getCombo().select(Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_REPOSITORY));
+	        			Activator.setCboRepositoriesInitialited(true);
+	        		} catch (Exception e) {
+	        			comboViewer.getCCombo().select(0);
+	        		}
 	        	}
             }
         } else {

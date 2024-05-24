@@ -33,8 +33,6 @@ public class ProjectsCombo extends Composite {
     }
 
     public void fillCboProjects() {
-        System.out.println("fillCboProjects");
-
         comboViewer.getCombo().removeAll();
         comboViewer.getCombo().add("All");
         comboViewer.getCombo().select(0);
@@ -49,11 +47,13 @@ public class ProjectsCombo extends Composite {
         	 * If this corresponds to a project that no longer exists,
         	 * select "All" 
         	 */
-        	try {
-        		System.out.println("Project default:" + Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_PROJECT));
-        		comboViewer.getCombo().select(Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_PROJECT));
-        	} catch (Exception e) {
-        		comboViewer.getCCombo().select(0);
+        	if (Activator.isCboProjectsInitiated() == false) {
+        		try {
+        			comboViewer.getCombo().select(Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_PROJECT));
+        			Activator.setCboProjectsInitiated(true);
+        		} catch (Exception e) {
+        			comboViewer.getCCombo().select(0);
+        		}
         	}
         }
         comboViewer.getCombo().update();

@@ -95,7 +95,7 @@ public class PullRequestTreeViewerTreeParent extends PullRequestTreeViewerDataCo
 												break;
 											case 3:
 												// Filter on Pull Request's Author
-												if (prValue.getAuthor().getUser().getName().toLowerCase().contains(lowerTextFilter)) {
+												if (prValue.getAuthor().getUser().getDisplayName().toLowerCase().contains(lowerTextFilter)) {
 													repositoryTree.addChild(pullRequest);
 												}
 												break;
@@ -103,7 +103,7 @@ public class PullRequestTreeViewerTreeParent extends PullRequestTreeViewerDataCo
 												// Filter on Pull Request reviewers
 												AtomicBoolean reviewerFound = new AtomicBoolean(false);
 												prValue.getReviewers().forEach(reviewer -> {
-													if (reviewer.getUser().getName().toLowerCase().contains(lowerTextFilter)) {
+													if (reviewer.getUser().getDisplayName().toLowerCase().contains(lowerTextFilter)) {
 														reviewerFound.getAndSet(true);
 													}
 												});

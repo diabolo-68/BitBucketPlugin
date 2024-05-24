@@ -10,7 +10,6 @@ import org.eclipse.swt.widgets.Menu;
 
 import com.diabolo.eclipse.bitbucket.Activator;
 
-
 public class PullRequestTreeViewer extends org.eclipse.jface.viewers.TreeViewer{
 
 	private Cursor waitCursor = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
@@ -29,15 +28,12 @@ public class PullRequestTreeViewer extends org.eclipse.jface.viewers.TreeViewer{
 		hookContextMenu();
 	}
 
-
 	public void fill(PullRequestTreeViewerTreeParent treeParent) {
 		
 		if (Display.getCurrent().getActiveShell() != null) {
 			Display.getCurrent().getActiveShell().setCursor(waitCursor);
 		}
 		
-System.out.println("FillViewerPullRequests");
-
 		if (Activator.getServices().projects != null && Activator.getServices().repositories != null) {
 			
 			setContentProvider(new PullRequestTreeViewerContentProvider(treeParent));

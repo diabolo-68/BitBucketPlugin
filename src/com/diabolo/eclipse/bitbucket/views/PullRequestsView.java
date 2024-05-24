@@ -143,7 +143,6 @@ public class PullRequestsView extends ViewPart {
 	 * using the BitBucket APIs
 	 */
 	public void refreshView(boolean refreshData, boolean refreshProjectsList, boolean refreshRepositoryList) {
-		System.out.println("refreshView");
 		
 		if (refreshData) {
 			Activator.getServices().Update();
@@ -161,8 +160,6 @@ public class PullRequestsView extends ViewPart {
 		com.diabolo.eclipse.bitbucket.api.Projects.Value currentProjectValue = (com.diabolo.eclipse.bitbucket.api.Projects.Value) cboProjects.getData(cboProjects.getItem(cboProjects.getSelectionIndex())); 
 		com.diabolo.eclipse.bitbucket.api.Repositories.Value currentRepositoryValue = (com.diabolo.eclipse.bitbucket.api.Repositories.Value) cboRepositories.getData(cboRepositories.getItem(cboRepositories.getSelectionIndex()));	
 		
-		System.out.println("cboProjects.getItem(cboProjects.getSelectionIndex()) " + cboProjects.getItem(cboProjects.getSelectionIndex()));
-
 		treeParent = new PullRequestTreeViewerTreeParent("Pull Requests", currentProjectValue, currentRepositoryValue, txtFilter.getText(), cboFilterOn.getSelectionIndex());			
 		
 		pullRequestsTreeViewer.fill(treeParent);
@@ -200,15 +197,11 @@ public class PullRequestsView extends ViewPart {
 	
 	public void storeDefaults() {
 		try {
-			System.out.println("Store defaults");
 			Activator.getStore().setValue(PreferenceConstants.P_DEFAULT_PROJECT, cboProjects.getSelectionIndex());
 			Activator.getStore().setValue(PreferenceConstants.P_DEFAULT_REPOSITORY, cboRepositories.getSelectionIndex());
 			Activator.getStore().save();
 		} catch (IOException e) {
 		}
-		System.out.println("Stored Project default: " + Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_PROJECT));
-		System.out.println("Stored Repo default: " + Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_REPOSITORY));
-
 	}
 	
 	public void setFocus() {

@@ -38,7 +38,6 @@ public class BitBucketServices {
 	}
 
 	public void Update() {
-		System.out.println("Update Data");		
 		projects = GetProjects();
 		repositories = GetRepositories();
 		if (projects != null && repositories != null) {
@@ -99,7 +98,6 @@ public class BitBucketServices {
 			connection.setRequestProperty ("Content-Type", "application/json");
 			return connection;
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
 			return null;
 		}
 	}
