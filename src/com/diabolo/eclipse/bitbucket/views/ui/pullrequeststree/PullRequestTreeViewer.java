@@ -2,13 +2,11 @@ package com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Tree;
 
 import com.diabolo.eclipse.bitbucket.Activator;
 

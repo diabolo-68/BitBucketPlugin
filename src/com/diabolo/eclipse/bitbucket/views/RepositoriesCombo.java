@@ -17,7 +17,7 @@ import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
 
 /*
  * By using composition, we avoid the SWTException related to subclassing
- * and maintain the necessary functionality in your application.
+ * and maintain the necessary functionality in the application.
  */
 public class RepositoriesCombo extends Composite {
 

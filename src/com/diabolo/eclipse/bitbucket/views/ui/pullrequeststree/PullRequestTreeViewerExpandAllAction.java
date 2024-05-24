@@ -1,8 +1,6 @@
 package com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.swt.widgets.Text;
-
 import com.diabolo.eclipse.bitbucket.Activator;
 
 public class PullRequestTreeViewerExpandAllAction extends Action{

@@ -13,14 +13,12 @@ import com.diabolo.eclipse.bitbucket.Activator;
 
 public class PullRequestTreeViewerMenuListener implements IMenuListener {
 
-	private PullRequestTreeViewer parent;
 	private Action collapseAllAction;
 	private Action expandAllAction;
 	private DrillDownAdapter drillDownAdapter;
 	
 	public PullRequestTreeViewerMenuListener(PullRequestTreeViewer parent) {
 		super();
-		this.parent = parent;
 		drillDownAdapter = new DrillDownAdapter(parent);
 		collapseAllAction = new PullRequestTreeViewerCollapseAllAction(parent);
 		expandAllAction = new PullRequestTreeViewerExpandAllAction(parent);

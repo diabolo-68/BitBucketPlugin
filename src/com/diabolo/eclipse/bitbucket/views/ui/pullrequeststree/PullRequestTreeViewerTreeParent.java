@@ -2,7 +2,7 @@ package com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 
@@ -71,25 +71,43 @@ public class PullRequestTreeViewerTreeParent extends PullRequestTreeViewerDataCo
 										 */
 										if (!lowerTextFilter.isBlank()) {
 											
+											PullRequestTreeViewerDataContainer pullRequest = new PullRequestTreeViewerDataContainer(treeName, prValue);
+											
 											switch (indexFilter) {
 											case 0:
 												// Filter on Pull Request's title
 												if (prValue.getTitle().toLowerCase().contains(lowerTextFilter)) {
-													PullRequestTreeViewerDataContainer pullRequest = new PullRequestTreeViewerDataContainer(treeName, prValue);
+													
 													repositoryTree.addChild(pullRequest);
 												}
 												break;
 											case 1:
 												// Filter on Pull Request's source branch name
 												if (prValue.getFromRef().getDisplayId().toLowerCase().contains(lowerTextFilter)) {
-													PullRequestTreeViewerDataContainer pullRequest = new PullRequestTreeViewerDataContainer(treeName, prValue);
 													repositoryTree.addChild(pullRequest);
 												}
 												break;
 											case 2:
 												// Filter on Pull Request's target branch name
 												if (prValue.getToRef().getDisplayId().toLowerCase().contains(lowerTextFilter)) {
-													PullRequestTreeViewerDataContainer pullRequest = new PullRequestTreeViewerDataContainer(treeName, prValue);
+													repositoryTree.addChild(pullRequest);
+												}
+												break;
+											case 3:
+												// Filter on Pull Request's Author
+												if (prValue.getAuthor().getUser().getName().toLowerCase().contains(lowerTextFilter)) {
+													repositoryTree.addChild(pullRequest);
+												}
+												break;
+											case 4:
+												// Filter on Pull Request reviewers
+												AtomicBoolean reviewerFound = new AtomicBoolean(false);
+												prValue.getReviewers().forEach(reviewer -> {
+													if (reviewer.getUser().getName().toLowerCase().contains(lowerTextFilter)) {
+														reviewerFound.getAndSet(true);
+													}
+												});
+												if (reviewerFound.get()) {
 													repositoryTree.addChild(pullRequest);
 												}
 												break;

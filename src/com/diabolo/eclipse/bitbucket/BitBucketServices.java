@@ -7,10 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Base64;
 import java.util.List;
-
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
-
 import com.diabolo.eclipse.bitbucket.api.Projects.Projects;
 import com.diabolo.eclipse.bitbucket.api.PullRequestsForCurrentUser.PullRequestsForCurrentUser;
 import com.diabolo.eclipse.bitbucket.api.Repositories.Repositories;

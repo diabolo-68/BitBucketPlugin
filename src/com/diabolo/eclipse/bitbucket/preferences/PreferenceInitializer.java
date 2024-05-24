@@ -1,8 +1,6 @@
 package com.diabolo.eclipse.bitbucket.preferences;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.UrlProtocol;
 

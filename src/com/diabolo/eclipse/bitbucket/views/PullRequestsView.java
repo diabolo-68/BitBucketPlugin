@@ -101,7 +101,7 @@ public class PullRequestsView extends ViewPart {
 		ComboViewer comboViewer = new ComboViewer(parent, SWT.NONE);
 		cboFilterOn = comboViewer.getCombo();
 		cboFilterOn.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-		cboFilterOn.setItems(new String[] { "Pull Request Title", "Source Branch", "Target Branch" });
+		cboFilterOn.setItems(new String[] { "Pull Request Title", "Source Branch", "Target Branch", "Author", "Reviewer" });
 		cboFilterOn.setToolTipText("Select on which element the filter must apply to");
 		cboFilterOn.select(0);
 		

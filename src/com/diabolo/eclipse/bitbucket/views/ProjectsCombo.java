@@ -1,20 +1,17 @@
 package com.diabolo.eclipse.bitbucket.views;
 
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
-
 import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.preferences.PreferenceConstants;
 
 /*
  * By using composition, you avoid the SWTException related to subclassing
- * and maintain the necessary functionality in your application.
+ * and maintain the necessary functionality in the application.
  */
 public class ProjectsCombo extends Composite {
 

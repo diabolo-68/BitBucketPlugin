@@ -1,8 +1,6 @@
 package com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.ui.IViewSite;
-
 import com.diabolo.eclipse.bitbucket.Activator;
 
 public class PullRequestTreeViewerContentProvider implements ITreeContentProvider {
@@ -11,7 +9,6 @@ public class PullRequestTreeViewerContentProvider implements ITreeContentProvide
 	
 	public Object[] getElements(Object parent) {
 		if (parent.equals(Activator.getPullRequestView().getViewSite())) {
-			
 			return getChildren(invisibleRoot);
 		}
 		return getChildren(parent);
