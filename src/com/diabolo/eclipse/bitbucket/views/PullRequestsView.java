@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,7 +11,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -54,7 +52,7 @@ public class PullRequestsView extends ViewPart {
 	
 	private RepositoriesCombo cboRepositories;
 	private ProjectsCombo cboProjects;
-	private Combo cboFilterOn;
+	private FilterOnCombo cboFilterOn;
 	
 	private Button btnApplyFilter;
 	private Button btnUpdateData;
@@ -74,20 +72,23 @@ public class PullRequestsView extends ViewPart {
 
 		cboProjects = new ProjectsCombo(parent, SWT.NONE);
 
-	
 		Label lblFilter = new Label(parent, SWT.NONE);
 		lblFilter.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblFilter.setText("Filter:");
 		
 		txtFilter = new Text(parent, SWT.BORDER);
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+		
+		if (Activator.isTxtFilterInitialized() == false) {
+			txtFilter.setText(Activator.getStore().getString(PreferenceConstants.P_DEFAULT_FILTERVALUE));
+			Activator.setTxtFilterInitialized(true);
+		}
 
 		btnApplyFilter = new Button(parent, SWT.NONE);
 		btnApplyFilter.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 		btnApplyFilter.setText("Apply Filter");
 		
 		cboRepositories = new RepositoriesCombo(parent, SWT.NONE);
-		cboRepositories.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 
 		btnSetDefault = new Button(parent, SWT.NONE);
 		btnSetDefault.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
@@ -98,12 +99,7 @@ public class PullRequestsView extends ViewPart {
 		lblFilterOn.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
 		lblFilterOn.setText("Filter on:");
 
-		ComboViewer comboViewer = new ComboViewer(parent, SWT.NONE);
-		cboFilterOn = comboViewer.getCombo();
-		cboFilterOn.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-		cboFilterOn.setItems(new String[] { "Pull Request Title", "Source Branch", "Target Branch", "Author", "Reviewer" });
-		cboFilterOn.setToolTipText("Select on which element the filter must apply to");
-		cboFilterOn.select(0);
+		cboFilterOn = new FilterOnCombo(parent, SWT.NONE);
 		
 		btnUpdateData = new Button(parent, SWT.NONE);
 		btnUpdateData.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
@@ -145,7 +141,7 @@ public class PullRequestsView extends ViewPart {
 	public void refreshView(boolean refreshData, boolean refreshProjectsList, boolean refreshRepositoryList) {
 		
 		if (refreshData) {
-			Activator.getServices().Update();
+			Activator.getServices().update();
 		}
 		
 		if (refreshProjectsList) {
@@ -160,7 +156,7 @@ public class PullRequestsView extends ViewPart {
 		com.diabolo.eclipse.bitbucket.api.Projects.Value currentProjectValue = (com.diabolo.eclipse.bitbucket.api.Projects.Value) cboProjects.getData(cboProjects.getItem(cboProjects.getSelectionIndex())); 
 		com.diabolo.eclipse.bitbucket.api.Repositories.Value currentRepositoryValue = (com.diabolo.eclipse.bitbucket.api.Repositories.Value) cboRepositories.getData(cboRepositories.getItem(cboRepositories.getSelectionIndex()));	
 		
-		treeParent = new PullRequestTreeViewerTreeParent("Pull Requests", currentProjectValue, currentRepositoryValue, txtFilter.getText(), cboFilterOn.getSelectionIndex());			
+		treeParent = new PullRequestTreeViewerTreeParent("Pull Requests", currentProjectValue, currentRepositoryValue, txtFilter.getText(), cboFilterOn.getCombo().getSelectionIndex());
 		
 		pullRequestsTreeViewer.fill(treeParent);
 	}
@@ -199,6 +195,8 @@ public class PullRequestsView extends ViewPart {
 		try {
 			Activator.getStore().setValue(PreferenceConstants.P_DEFAULT_PROJECT, cboProjects.getSelectionIndex());
 			Activator.getStore().setValue(PreferenceConstants.P_DEFAULT_REPOSITORY, cboRepositories.getSelectionIndex());
+			Activator.getStore().setValue(PreferenceConstants.P_DEFAULT_FILTERON, cboFilterOn.getSelectionIndex());
+			Activator.getStore().setValue(PreferenceConstants.P_DEFAULT_FILTERVALUE, txtFilter.getText());
 			Activator.getStore().save();
 		} catch (IOException e) {
 		}

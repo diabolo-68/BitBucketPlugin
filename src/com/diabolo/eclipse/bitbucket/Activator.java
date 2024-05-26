@@ -41,40 +41,75 @@ public class Activator extends AbstractUIPlugin {
 	
     private static ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "com.diabolo.eclipse.bitbucket");
 
-    private static boolean cboProjectsInitiated = false;
+    private static boolean cboProjectsInitialized = false;
     
-    private static boolean cboRepositoriesInitialited = false;
+    private static boolean cboRepositoriesInitialized = false;
     
+    private static boolean cboFilterOnInitialized = false;
+    
+    private static boolean txtFilterInitialized = false;
     
 	/**
-	 * @return the cboProjectsInitiated
+	 * @return the txtFilterInitialized
 	 */
-	public static boolean isCboProjectsInitiated() {
-		return cboProjectsInitiated;
+	public static boolean isTxtFilterInitialized() {
+		return txtFilterInitialized;
 	}
 
 
 	/**
-	 * @param cboProjectsInitiated the cboProjectsInitiated to set
+	 * @param txtFilterInitialized the txtFilterInitialized to set
 	 */
-	public static void setCboProjectsInitiated(boolean cboProjectsInitiated) {
-		Activator.cboProjectsInitiated = cboProjectsInitiated;
+	public static void setTxtFilterInitialized(boolean txtFilterInitialized) {
+		Activator.txtFilterInitialized = txtFilterInitialized;
 	}
 
 
 	/**
-	 * @return the cboRepositoriesInitialited
+	 * @return the cboProjectsInitialized
 	 */
-	public static boolean isCboRepositoriesInitialited() {
-		return cboRepositoriesInitialited;
+	public static boolean isCboProjectsInitialized() {
+		return cboProjectsInitialized;
 	}
 
 
 	/**
-	 * @param cboRepositoriesInitialited the cboRepositoriesInitialited to set
+	 * @return the cboFilterOnInitialized
 	 */
-	public static void setCboRepositoriesInitialited(boolean cboRepositoriesInitialited) {
-		Activator.cboRepositoriesInitialited = cboRepositoriesInitialited;
+	public static boolean isCboFilterOnInitialized() {
+		return cboFilterOnInitialized;
+	}
+
+
+	/**
+	 * @param cboFilterOnInitialized the cboFilterOnInitialized to set
+	 */
+	public static void setCboFilterOnInitialized(boolean cboFilterOnInitialized) {
+		Activator.cboFilterOnInitialized = cboFilterOnInitialized;
+	}
+
+
+	/**
+	 * @param cboProjectsInitialized the cboProjectsInitialized to set
+	 */
+	public static void setCboProjectsInitialized(boolean cboProjectsInitialized) {
+		Activator.cboProjectsInitialized = cboProjectsInitialized;
+	}
+
+
+	/**
+	 * @return the cboRepositoriesInitialized
+	 */
+	public static boolean isCboRepositoriesInitialized() {
+		return cboRepositoriesInitialized;
+	}
+
+
+	/**
+	 * @param cboRepositoriesInitialized the cboRepositoriesInitialized to set
+	 */
+	public static void setCboRepositoriesInitialized(boolean cboRepositoriesInitialized) {
+		Activator.cboRepositoriesInitialized = cboRepositoriesInitialized;
 	}
 
 

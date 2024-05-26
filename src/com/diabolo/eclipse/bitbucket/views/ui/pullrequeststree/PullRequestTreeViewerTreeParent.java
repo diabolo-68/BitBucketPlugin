@@ -60,7 +60,7 @@ public class PullRequestTreeViewerTreeParent extends PullRequestTreeViewerDataCo
 						 */
 						if (currentProjectValue == null	|| repository.getProject().getId().compareTo(currentProjectValue.getId()) == 0) {
 							
-							pullRequests = Activator.getServices().GetPullRequestsForRepo(repository.getProject().getKey(), repository.getName());
+							pullRequests = Activator.getServices().getPullRequestsForRepo(repository.getProject().getKey(), repository.getName());
 							
 							if (pullRequests != null) {
 								

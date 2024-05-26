@@ -47,12 +47,12 @@ public class ProjectsCombo extends Composite {
         	 * If this corresponds to a project that no longer exists,
         	 * select "All" 
         	 */
-        	if (Activator.isCboProjectsInitiated() == false) {
+        	if (Activator.isCboProjectsInitialized() == false) {
         		try {
         			comboViewer.getCombo().select(Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_PROJECT));
-        			Activator.setCboProjectsInitiated(true);
+        			Activator.setCboProjectsInitialized(true);
         		} catch (Exception e) {
-        			comboViewer.getCCombo().select(0);
+        			comboViewer.getCombo().select(0);
         		}
         	}
         }

@@ -81,12 +81,12 @@ public class RepositoriesCombo extends Composite {
 	        	 * If this corresponds to a repository that no longer exists,
 	        	 * select "All" 
 	        	 */
-	        	if (Activator.isCboRepositoriesInitialited() == false) {
+	        	if (Activator.isCboRepositoriesInitialized() == false) {
 	        		try {
 	        			comboViewer.getCombo().select(Activator.getStore().getInt(PreferenceConstants.P_DEFAULT_REPOSITORY));
-	        			Activator.setCboRepositoriesInitialited(true);
+	        			Activator.setCboRepositoriesInitialized(true);
 	        		} catch (Exception e) {
-	        			comboViewer.getCCombo().select(0);
+	        			comboViewer.getCombo().select(0);
 	        		}
 	        	}
             }

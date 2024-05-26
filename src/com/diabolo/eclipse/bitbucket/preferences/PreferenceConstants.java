@@ -14,4 +14,6 @@ public class PreferenceConstants {
 	public static final String P_COMBOSIZE = "COMBOSIZE";
 	public static final String P_DEFAULT_PROJECT = "DEFAULTPROJECT";
 	public static final String P_DEFAULT_REPOSITORY = "DEFAULTREPOSITORY";
+	public static final String P_DEFAULT_FILTERON = "DEFAULTFILTERON";
+	public static final String P_DEFAULT_FILTERVALUE = "DEFAULTFILTERVALUE";
 }
