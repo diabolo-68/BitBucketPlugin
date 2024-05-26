@@ -12,8 +12,6 @@ import com.diabolo.eclipse.bitbucket.Activator;
 
 public class PullRequestTreeViewer extends org.eclipse.jface.viewers.TreeViewer{
 
-	private Cursor waitCursor = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
-	
 	public PullRequestTreeViewerClickAction PullRequestClickAction;
 	
 	public PullRequestTreeViewer() {
@@ -30,22 +28,13 @@ public class PullRequestTreeViewer extends org.eclipse.jface.viewers.TreeViewer{
 
 	public void fill(PullRequestTreeViewerTreeParent treeParent) {
 		
-		if (Display.getCurrent().getActiveShell() != null) {
-			Display.getCurrent().getActiveShell().setCursor(waitCursor);
-		}
-		
 		if (Activator.getServices().projects != null && Activator.getServices().repositories != null) {
 			
 			setContentProvider(new PullRequestTreeViewerContentProvider(treeParent));
 			setLabelProvider(new PullRequestTreeViewerLabelProvider());
 			setInput(Activator.getPullRequestView().getViewSite());
 			expandAll();					
-		}
-
-		if (Display.getCurrent().getActiveShell() != null) {
-			Display.getCurrent().getActiveShell().setCursor(null);
-		}
-        
+		}        
 	}	
 	/*
 	 * Define a context-menu on the tree-view

@@ -3,6 +3,11 @@ package com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.widgets.Display;
+
 import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.PullRequestForRepository;
 
@@ -10,14 +15,21 @@ public class PullRequestTreeViewerTreeParent extends PullRequestTreeViewerDataCo
 	
 	private ArrayList<PullRequestTreeViewerDataContainer> children = new ArrayList<PullRequestTreeViewerDataContainer>();
 
+	private Cursor waitCursor = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
+	
 	public PullRequestTreeViewerTreeParent(String name) {
 		super(name);
 	}
 	
 	public PullRequestTreeViewerTreeParent (String name, com.diabolo.eclipse.bitbucket.api.Projects.Value currentProjectValue, com.diabolo.eclipse.bitbucket.api.Repositories.Value currentRepositoryValue, String textFilter, int indexFilter) {
 		
+
 		super(name);
 		
+		if (Display.getCurrent().getActiveShell() != null) {
+			Display.getCurrent().getActiveShell().setCursor(waitCursor);
+		}
+
 		final String lowerTextFilter = textFilter.toLowerCase();
 		
 		/*
@@ -127,6 +139,11 @@ public class PullRequestTreeViewerTreeParent extends PullRequestTreeViewerDataCo
 				});
 			}		
 		}
+
+		if (Display.getCurrent().getActiveShell() != null) {
+			Display.getCurrent().getActiveShell().setCursor(null);
+		}
+
 	}
 	
 	public void addChild(PullRequestTreeViewerDataContainer child) {
