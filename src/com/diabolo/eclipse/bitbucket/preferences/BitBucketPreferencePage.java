@@ -63,6 +63,9 @@ public class BitBucketPreferencePage
 
 			});
 		
+		addField(
+				new IntegerFieldEditor(PreferenceConstants.P_COMBOSIZE, "Projects and Repositories size", getFieldEditorParent()));
+		
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)

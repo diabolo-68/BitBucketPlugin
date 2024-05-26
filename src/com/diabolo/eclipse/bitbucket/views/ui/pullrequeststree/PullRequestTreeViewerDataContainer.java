@@ -1,0 +1,96 @@
+package com.diabolo.eclipse.bitbucket.views.ui.pullrequeststree;
+
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.eclipse.core.runtime.IAdaptable;
+
+import com.diabolo.eclipse.bitbucket.Activator;
+import com.diabolo.eclipse.bitbucket.api.pullrequestforrepository.Value;
+import com.diabolo.eclipse.bitbucket.views.ui.pullrequesttable.PullRequestTableViewerDataContainer;
+
+public class PullRequestTreeViewerDataContainer implements IAdaptable {
+	
+	private String name;
+	private PullRequestTreeViewerTreeParent parent;
+	private Object data;
+	private ArrayList<PullRequestTableViewerDataContainer> tableLines;
+
+	public PullRequestTreeViewerDataContainer(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the tableLines
+	 */
+	public ArrayList<PullRequestTableViewerDataContainer> getTableLines() {
+		return tableLines;
+	}
+
+	public PullRequestTreeViewerDataContainer(String name, Object data) {
+
+		this.name = name;
+		this.data = data;
+		tableLines = new ArrayList<>();
+				
+		if (this.data instanceof Value) {
+			Value prValue = ((Value) this.data);
+
+			tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_AUTHOR, "Author", prValue.getAuthor().getUser().getDisplayName(), tableLines.size() + 1));
+			tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_SOURCE,"Title", prValue.getTitle(), tableLines.size() + 1));
+			tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_BRANCHES,"Branch", prValue.getFromRef().getId(), tableLines.size() + 1));
+			
+			String state = prValue.getProperties().getMergeResult().getOutcome();
+			if (state.equalsIgnoreCase("clean")) {
+				tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_SYMBOLS,"State", state, tableLines.size() + 1));		   					
+			} else {
+				tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_WARNINGS,"State", state, tableLines.size() + 1));		   							   					
+			}
+			/*
+			 * Get the pull-request's reviewers
+			 * We don't increment the line to force the table to display
+			 * all the data with the same background color
+			 */
+			
+			AtomicInteger reviewerNumber = new AtomicInteger(0);
+			 
+			prValue.getReviewers().forEach(reviewer -> {
+	
+				final String image;
+				
+				if (reviewer.getStatus().equalsIgnoreCase("unapproved")) {
+					image = Activator.ICON_PERSON_WITH_CROSS;
+				} else {
+					image = Activator.ICON_PERSON_WITH_TICK;
+				}
+				tableLines.add(new PullRequestTableViewerDataContainer(image, "Reviewer #" + reviewerNumber.incrementAndGet(), reviewer.getUser().getDisplayName() + " (" + reviewer.getStatus().toLowerCase() + ")", tableLines.size() + 1)); 
+			});
+		}
+	}
+
+	public Object getData() {
+		return this.data;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setParent(PullRequestTreeViewerTreeParent parent) {
+		this.parent = parent;
+	}
+
+	public PullRequestTreeViewerTreeParent getParent() {
+		return parent;
+	}
+
+	@Override
+	public String toString() {
+		return getName();
+	}
+
+	@Override
+	public <T> T getAdapter(Class<T> key) {
+		return null;
+	}
+}
