@@ -3,6 +3,7 @@ package com.diabolo.eclipse.bitbucket.preferences;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import com.diabolo.eclipse.bitbucket.Activator;
 import com.diabolo.eclipse.bitbucket.UrlProtocol;
+import com.diabolo.eclipse.bitbucket.views.FilterOnComboValues;
 
 /**
  * Class used to initialize default preference values.
@@ -21,8 +22,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		Activator.getStore().setDefault(PreferenceConstants.P_BBUSER, "");
 		Activator.getStore().setDefault(PreferenceConstants.P_BBPASSWORD, "");
 		Activator.getStore().setDefault(PreferenceConstants.P_COMBOSIZE, 150);
-		Activator.getStore().setDefault(PreferenceConstants.P_DEFAULT_PROJECT, "All");
-		Activator.getStore().setDefault(PreferenceConstants.P_DEFAULT_REPOSITORY, "All");
+		Activator.getStore().setDefault(PreferenceConstants.P_DEFAULT_PROJECT, 0);
+		Activator.getStore().setDefault(PreferenceConstants.P_DEFAULT_REPOSITORY, 0);
+		Activator.getStore().setDefault(PreferenceConstants.P_DEFAULT_FILTERON, 0);
+		Activator.getStore().setDefault(PreferenceConstants.P_DEFAULT_FILTERVALUE, "");
 	}
-
 }

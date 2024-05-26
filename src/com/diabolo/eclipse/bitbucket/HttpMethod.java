@@ -1,5 +1,5 @@
 package com.diabolo.eclipse.bitbucket;
 
-public enum httpMethod {
+public enum HttpMethod {
 	GET, POST, PUT, DELETE, PATCH, HEAD
 }

@@ -37,9 +37,9 @@ public class BitBucketServices {
         basePath = Activator.getStore().getString(PreferenceConstants.P_BASEPATH);
 	}
 
-	public void Update() {
-		projects = GetProjects();
-		repositories = GetRepositories();
+	public void update() {
+		projects = getProjects();
+		repositories = getRepositories();
 		if (projects != null && repositories != null) {
 			repositoriesValues = repositories.getValues();
 			projectsValues = projects.getValues();					
@@ -50,19 +50,19 @@ public class BitBucketServices {
 	 * @param url the url to set
 	 * @throws MalformedURLException 
 	 */
-	private void SetUrl(Api apiName, UrlProtocol protocol, String host, String basePath) throws MalformedURLException {
+	private void setUrl(Api apiName, UrlProtocol protocol, String host, String basePath) throws MalformedURLException {
 		setUrl (apiName, protocol, host, basePath, "", "");
 	}
 		
 	private void setUrl(Api apiName, UrlProtocol protocol, String host, String basePath, String projectKey, String RepositorySlug) throws MalformedURLException {
-		SetUrl (apiName, protocol, host, basePath, projectKey, RepositorySlug, "");
+		setUrl (apiName, protocol, host, basePath, projectKey, RepositorySlug, "");
 	}
 
 	/**
 	 * @param url the url to set
 	 * @throws MalformedURLException 
 	 */
-	private void SetUrl(Api apiName, UrlProtocol protocol, String host, String basePath, String projectKey, String repositorySlug, String filter) throws MalformedURLException {
+	private void setUrl(Api apiName, UrlProtocol protocol, String host, String basePath, String projectKey, String repositorySlug, String filter) throws MalformedURLException {
 		
 		switch (apiName) {
 			case GET_PULLREQUESTS_FOR_CURRENT_USER:
@@ -86,7 +86,7 @@ public class BitBucketServices {
 		};
 	}
 
-	private HttpURLConnection setBaseConnection(httpMethod method) {
+	private HttpURLConnection setBaseConnection(HttpMethod method) {
 		
         HttpURLConnection connection;
 		try {
@@ -119,11 +119,11 @@ public class BitBucketServices {
 
 	}
 	
-	public PullRequestsForCurrentUser GetPullRequests(PullRequestState state) {
+	public PullRequestsForCurrentUser getPullRequests(PullRequestState state) {
 				
 		try {
-			SetUrl(Api.GET_PULLREQUESTS_FOR_CURRENT_USER, UrlProtocol.https , host, basePath, "", "", state.toString());
-			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
+			setUrl(Api.GET_PULLREQUESTS_FOR_CURRENT_USER, UrlProtocol.https , host, basePath, "", "", state.toString());
+			HttpURLConnection connection = setBaseConnection(HttpMethod.GET);
 			
 			if (connection.getResponseCode() == 200) {
 				StringBuffer response = getHttpResponse(connection);
@@ -143,11 +143,11 @@ public class BitBucketServices {
         
 	}
 	
-	public PullRequestForRepository GetPullRequestsForRepo(String projectKey, String repositorySlug) {
+	public PullRequestForRepository getPullRequestsForRepo(String projectKey, String repositorySlug) {
 		
 		try {
 			setUrl(Api.GET_PULLREQUESTS_FOR_REPO, UrlProtocol.https , host, basePath, projectKey, repositorySlug);
-			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
+			HttpURLConnection connection = setBaseConnection(HttpMethod.GET);
 			
 			if (connection.getResponseCode() == 200) {
 				StringBuffer response = getHttpResponse(connection);
@@ -165,11 +165,11 @@ public class BitBucketServices {
 		
 	}
 
-	public Projects GetProjects() {
+	public Projects getProjects() {
 		
 		try {
-			SetUrl(Api.GET_PROJECTS, UrlProtocol.https , host, basePath);
-			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
+			setUrl(Api.GET_PROJECTS, UrlProtocol.https , host, basePath);
+			HttpURLConnection connection = setBaseConnection(HttpMethod.GET);
 			
 			if (connection.getResponseCode() == 200) {
 				StringBuffer response = getHttpResponse(connection);
@@ -188,11 +188,11 @@ public class BitBucketServices {
 		
 	}
 		
-	public Repositories GetRepositories() {
+	public Repositories getRepositories() {
 		
 		try {
-			SetUrl(Api.GET_REPOSITORIES, UrlProtocol.https , host, basePath);
-			HttpURLConnection connection = setBaseConnection(httpMethod.GET);
+			setUrl(Api.GET_REPOSITORIES, UrlProtocol.https , host, basePath);
+			HttpURLConnection connection = setBaseConnection(HttpMethod.GET);
 			
 			if (connection.getResponseCode() == 200) {
 				StringBuffer response = getHttpResponse(connection);
