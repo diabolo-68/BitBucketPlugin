@@ -15,6 +15,7 @@ public class PullRequestTreeViewerMenuListener implements IMenuListener {
 
 	private Action collapseAllAction;
 	private Action expandAllAction;
+	private Action openSelectedPullRequest;
 	private DrillDownAdapter drillDownAdapter;
 	
 	public PullRequestTreeViewerMenuListener(PullRequestTreeViewer parent) {
@@ -34,14 +35,15 @@ public class PullRequestTreeViewerMenuListener implements IMenuListener {
 		manager.add(collapseAllAction);
 		manager.add(expandAllAction);
 		manager.add(new Separator());
+		manager.add(openSelectedPullRequest);
 		drillDownAdapter.addNavigationActions(manager);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
 	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(collapseAllAction);
 		manager.add(new Separator());
+		manager.add(collapseAllAction);
 		manager.add(expandAllAction);
 	}
 

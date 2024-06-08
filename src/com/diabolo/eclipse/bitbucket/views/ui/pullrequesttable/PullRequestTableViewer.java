@@ -3,9 +3,13 @@ package com.diabolo.eclipse.bitbucket.views.ui.pullrequesttable;
 import java.util.ArrayList;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -23,7 +27,7 @@ public class PullRequestTableViewer extends org.eclipse.jface.viewers.TableViewe
 	
 	private void setLayout() {
 		Table table = this.getTable();
-		table.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		table.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 4, 4));
 		getControl().setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL | GridData.FILL_BOTH));
 		
 	}
@@ -32,6 +36,8 @@ public class PullRequestTableViewer extends org.eclipse.jface.viewers.TableViewe
 		setContentProvider(ArrayContentProvider.getInstance());
 		PullRequestTableViewerLabelProvider labelProvider = new PullRequestTableViewerLabelProvider();
 		setLabelProvider(labelProvider);
+		PullRequestTableViewerDoubleClickListener doubleClickListener = new PullRequestTableViewerDoubleClickListener ();
+		addDoubleClickListener(doubleClickListener);
 	}
 	
 	/**

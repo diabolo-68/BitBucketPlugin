@@ -5,7 +5,22 @@ public class PullRequestTableViewerDataContainer {
 	private String key;
 	private String value;
 	private Integer index;
+	private String url;
 	
+
+	/**
+	 * @return the url
+	 */
+	public String getUrl() {
+		return url;
+	}
+
+	/**
+	 * @param url the url to set
+	 */
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
 	/**
 	 * @return the index
@@ -70,6 +85,15 @@ public class PullRequestTableViewerDataContainer {
 		this.index = index;
 	}
 
+	public PullRequestTableViewerDataContainer(String imageKey, String key, String value, String url, Integer index) {
+		super();
+		this.imageKey = imageKey;
+		this.key = key;
+		this.value = value;
+		this.index = index;
+		this.url = url;
+	}
+	
 	public String getImageKey() {
 		return imageKey;
 	}

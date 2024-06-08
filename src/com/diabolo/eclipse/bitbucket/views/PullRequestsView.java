@@ -110,11 +110,11 @@ public class PullRequestsView extends ViewPart {
 		compositePanel.setLayoutData(gd_compositePanel);
 		compositePanel.setBackground(Display.getCurrent().getSystemColor(SWT.BACKGROUND));
 		compositePanel.setLayout(new FillLayout(SWT.HORIZONTAL));
-		pullRequestsTreeViewer = new PullRequestTreeViewer(compositePanel, SWT.FULL_SELECTION);
+		pullRequestsTreeViewer = new PullRequestTreeViewer(compositePanel, SWT.BORDER | SWT.FULL_SELECTION);
 		
 		Composite detailPanelComposite = new Composite(compositePanel, SWT.NONE);
 		detailPanelComposite.setLayout(new GridLayout(1, false));
-		tableViewer = new PullRequestTableViewer(detailPanelComposite, SWT.FULL_SELECTION);
+		tableViewer = new PullRequestTableViewer(detailPanelComposite, SWT.BORDER | SWT.FULL_SELECTION);
 		
 		descriptionText = new Text(detailPanelComposite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
 		GridData gd_descriptionText = new GridData(SWT.FILL , SWT.FILL, true, true, 1, 1);

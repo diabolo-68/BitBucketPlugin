@@ -77,7 +77,6 @@ public class PullRequestTreeViewerTreeParent extends PullRequestTreeViewerDataCo
 										 */
 										String treeName = String.format("%s - %s", prValue.getTitle(),
 												prValue.getAuthor().getUser().getDisplayName());
-										
 										/*
 										 * Apply the filters
 										 */
