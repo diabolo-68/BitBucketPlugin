@@ -36,16 +36,22 @@ public class PullRequestTreeViewerDataContainer implements IAdaptable {
 		if (this.data instanceof Value) {
 			Value prValue = ((Value) this.data);
 
-			tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_AUTHOR, "Author", prValue.getAuthor().getUser().getDisplayName(), tableLines.size() + 1));
+			tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_AUTHOR, "Author", prValue.getAuthor().getUser().getDisplayName(), prValue.getAuthor().getUser().getLinks().getSelf().get(0).getHref(), tableLines.size() + 1));
 			tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_SOURCE,"Title", prValue.getTitle(), tableLines.size() + 1));
 			tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_BRANCHES,"Branch", prValue.getFromRef().getId(), tableLines.size() + 1));
 			
 			String state = prValue.getProperties().getMergeResult().getOutcome();
+			
+			String stateIcon;
+			
 			if (state.equalsIgnoreCase("clean")) {
-				tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_SYMBOLS,"State", state, tableLines.size() + 1));		   					
+				stateIcon = Activator.ICON_SYMBOLS;		   					
 			} else {
-				tableLines.add(new PullRequestTableViewerDataContainer(Activator.ICON_WARNINGS,"State", state, tableLines.size() + 1));		   							   					
+				stateIcon = Activator.ICON_WARNINGS;		   							   					
 			}
+			
+			tableLines.add(new PullRequestTableViewerDataContainer(stateIcon, "State", state, tableLines.size() + 1));		   							   					
+			
 			/*
 			 * Get the pull-request's reviewers
 			 * We don't increment the line to force the table to display
@@ -56,14 +62,19 @@ public class PullRequestTreeViewerDataContainer implements IAdaptable {
 			 
 			prValue.getReviewers().forEach(reviewer -> {
 	
-				final String image;
+				final String reviewState;
 				
 				if (reviewer.getStatus().equalsIgnoreCase("unapproved")) {
-					image = Activator.ICON_PERSON_WITH_CROSS;
+					reviewState = Activator.ICON_PERSON_WITH_CROSS;
 				} else {
-					image = Activator.ICON_PERSON_WITH_TICK;
+					reviewState = Activator.ICON_PERSON_WITH_TICK;
 				}
-				tableLines.add(new PullRequestTableViewerDataContainer(image, "Reviewer #" + reviewerNumber.incrementAndGet(), reviewer.getUser().getDisplayName() + " (" + reviewer.getStatus().toLowerCase() + ")", tableLines.size() + 1)); 
+				
+				tableLines.add(new PullRequestTableViewerDataContainer(reviewState,
+																	   "Reviewer #" + reviewerNumber.incrementAndGet(),
+																	   reviewer.getUser().getDisplayName() + " (" + reviewer.getStatus().toLowerCase() + ")",
+																	   reviewer.getUser().getLinks().getSelf().get(0).getHref(),
+																	   tableLines.size() + 1));
 			});
 		}
 	}
